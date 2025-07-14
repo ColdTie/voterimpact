@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import FilterBar from './components/FilterBar';
@@ -293,12 +293,19 @@ function MainApp() {
   const [politicians, setPoliticians] = useState(samplePoliticians);
   const [politiciansLoading, setPoliticiansLoading] = useState(false);
   
-  // Load politicians when component mounts or when user location changes
-  useEffect(() => {
-    loadPoliticians();
-  }, [userProfile?.location, loadPoliticians]);
+  // Helper to extract state from location string
+  const extractStateFromLocation = useCallback((location) => {
+    if (!location) return null;
+    const locationLower = location.toLowerCase();
+    if (locationLower.includes('nevada') || locationLower.includes('nv')) return 'NV';
+    if (locationLower.includes('california') || locationLower.includes('ca')) return 'CA';
+    if (locationLower.includes('vermont') || locationLower.includes('vt')) return 'VT';
+    if (locationLower.includes('massachusetts') || locationLower.includes('ma')) return 'MA';
+    if (locationLower.includes('montana') || locationLower.includes('mt')) return 'MT';
+    return null;
+  }, []);
   
-  const loadPoliticians = async () => {
+  const loadPoliticians = useCallback(async () => {
     try {
       setPoliticiansLoading(true);
       
@@ -316,19 +323,12 @@ function MainApp() {
     } finally {
       setPoliticiansLoading(false);
     }
-  };
+  }, [userProfile?.location, extractStateFromLocation]);
   
-  // Helper to extract state from location string
-  const extractStateFromLocation = (location) => {
-    if (!location) return null;
-    const locationLower = location.toLowerCase();
-    if (locationLower.includes('nevada') || locationLower.includes('nv')) return 'NV';
-    if (locationLower.includes('california') || locationLower.includes('ca')) return 'CA';
-    if (locationLower.includes('vermont') || locationLower.includes('vt')) return 'VT';
-    if (locationLower.includes('massachusetts') || locationLower.includes('ma')) return 'MA';
-    if (locationLower.includes('montana') || locationLower.includes('mt')) return 'MT';
-    return null;
-  };
+  // Load politicians when component mounts or when user location changes
+  useEffect(() => {
+    loadPoliticians();
+  }, [loadPoliticians]);
   
   const filteredLegislation = sampleLegislation.filter(item => {
     const matchesCategory = activeFilter === 'All Issues' || item.category === activeFilter;
