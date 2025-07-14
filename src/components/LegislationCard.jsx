@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { analyzePersonalImpact } from '../services/claudeService';
+import PoliticianCard from './PoliticianCard';
+import SocialShare from './SocialShare';
 
-const LegislationCard = ({ legislation, useAI = false }) => {
+const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelected = false, onSelectionChange }) => {
   const { userProfile } = useAuth();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showSocialShare, setShowSocialShare] = useState(false);
 
   const {
     title,
@@ -74,6 +77,13 @@ const LegislationCard = ({ legislation, useAI = false }) => {
     return `${sign}$${absAmount.toLocaleString()}`;
   };
 
+  const findPolitician = (id) => {
+    return politicians.find(p => p.id === id);
+  };
+
+  const sponsor = findPolitician(legislation.sponsor);
+  const cosponsors = legislation.cosponsors ? legislation.cosponsors.map(findPolitician).filter(Boolean) : [];
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 mx-4 mb-4 p-4">
       <div className="flex items-start justify-between mb-3">
@@ -97,10 +107,109 @@ const LegislationCard = ({ legislation, useAI = false }) => {
             )}
           </div>
         </div>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-          {status}
-        </span>
+        <div className="flex items-center space-x-2">
+          {onSelectionChange && (
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => onSelectionChange(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span className="ml-1 text-xs text-gray-600">Compare</span>
+            </label>
+          )}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+            {status}
+          </span>
+        </div>
       </div>
+
+      {/* Politicians Section */}
+      {(sponsor || cosponsors.length > 0) && (
+        <div className="border-l-4 border-blue-500 pl-3 mb-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Legislators</h4>
+          
+          {sponsor && (
+            <div className="mb-2">
+              <div className="text-xs text-gray-500 mb-1">Sponsor</div>
+              <PoliticianCard politician={sponsor} size="medium" />
+            </div>
+          )}
+          
+          {cosponsors.length > 0 && (
+            <div>
+              <div className="text-xs text-gray-500 mb-1">
+                Co-sponsors ({cosponsors.length})
+              </div>
+              <div className="space-y-1">
+                {cosponsors.slice(0, 3).map((cosponsor, index) => (
+                  <PoliticianCard key={index} politician={cosponsor} size="small" />
+                ))}
+                {cosponsors.length > 3 && (
+                  <div className="text-xs text-gray-500 pl-2">
+                    + {cosponsors.length - 3} more co-sponsors
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Voting Record Section */}
+      {legislation.votingRecord && (
+        <div className="bg-gray-50 rounded-lg p-3 mb-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Legislative Progress</h4>
+          
+          {legislation.votingRecord.lastAction && (
+            <div className="text-xs text-gray-600 mb-2">
+              <strong>Last Action:</strong> {legislation.votingRecord.lastAction}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 gap-2">
+            {legislation.votingRecord.committee && (
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-600">Committee Vote:</span>
+                <div className="flex space-x-2">
+                  <span className="text-green-600">✓ {legislation.votingRecord.committee.yes}</span>
+                  <span className="text-red-600">✗ {legislation.votingRecord.committee.no}</span>
+                  {legislation.votingRecord.committee.abstain > 0 && (
+                    <span className="text-gray-500">- {legislation.votingRecord.committee.abstain}</span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {legislation.votingRecord.senate && (
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-600">Senate Vote:</span>
+                <div className="flex space-x-2">
+                  <span className="text-green-600">✓ {legislation.votingRecord.senate.yes}</span>
+                  <span className="text-red-600">✗ {legislation.votingRecord.senate.no}</span>
+                  {legislation.votingRecord.senate.abstain > 0 && (
+                    <span className="text-gray-500">- {legislation.votingRecord.senate.abstain}</span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {legislation.votingRecord.house && (
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-600">House Vote:</span>
+                <div className="flex space-x-2">
+                  <span className="text-green-600">✓ {legislation.votingRecord.house.yes}</span>
+                  <span className="text-red-600">✗ {legislation.votingRecord.house.no}</span>
+                  {legislation.votingRecord.house.abstain > 0 && (
+                    <span className="text-gray-500">- {legislation.votingRecord.house.abstain}</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="bg-gray-50 rounded-lg p-3 mb-3">
         <div className="flex items-center justify-between mb-2">
@@ -179,18 +288,10 @@ const LegislationCard = ({ legislation, useAI = false }) => {
           <div className="flex items-center justify-between pt-2 border-t border-gray-200">
             <div className="flex space-x-2">
               <button
-                onClick={() => {
-                  const shareText = `${title}\n\nPersonal Impact: ${personalImpact}\n\nFinancial Effect: ${formatFinancialEffect(financialEffect)}\nTimeline: ${timeline}\n\nShared from VoterImpact`;
-                  if (navigator.share) {
-                    navigator.share({ title, text: shareText });
-                  } else {
-                    navigator.clipboard.writeText(shareText);
-                    alert('Analysis copied to clipboard!');
-                  }
-                }}
+                onClick={() => setShowSocialShare(true)}
                 className="text-xs text-blue-600 hover:text-blue-800 font-medium"
               >
-                Share Analysis
+                🔗 Share Analysis
               </button>
               <button
                 onClick={() => {
@@ -232,6 +333,22 @@ const LegislationCard = ({ legislation, useAI = false }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Enhanced Social Share Modal */}
+      {showSocialShare && (
+        <SocialShare
+          legislation={legislation}
+          analysis={analysis || {
+            personalImpact,
+            financialEffect,
+            timeline,
+            confidence,
+            isBenefit
+          }}
+          userProfile={userProfile}
+          onClose={() => setShowSocialShare(false)}
+        />
       )}
     </div>
   );

@@ -5,6 +5,72 @@ import FilterBar from './components/FilterBar';
 import LegislationCard from './components/LegislationCard';
 import AuthWrapper from './components/Auth/AuthWrapper';
 import UserProfileForm from './components/UserProfileForm';
+import PoliticianCard from './components/PoliticianCard';
+import ComparisonModal from './components/ComparisonModal';
+
+const samplePoliticians = [
+  {
+    id: 'sanders-vt',
+    name: 'Bernie Sanders',
+    party: 'Independent',
+    position: 'Senator',
+    state: 'Vermont',
+    photo: 'https://www.sanders.senate.gov/wp-content/uploads/Sanders-Profile-768x768.jpg',
+    website: 'https://www.sanders.senate.gov/',
+    votingRecord: { progressive: 95, bipartisan: 45 }
+  },
+  {
+    id: 'warren-ma',
+    name: 'Elizabeth Warren',
+    party: 'Democratic',
+    position: 'Senator',
+    state: 'Massachusetts',
+    photo: 'https://www.warren.senate.gov/files/images/warren_headshot.jpg',
+    website: 'https://www.warren.senate.gov/',
+    votingRecord: { progressive: 90, bipartisan: 55 }
+  },
+  {
+    id: 'cortez-masto-nv',
+    name: 'Catherine Cortez Masto',
+    party: 'Democratic',
+    position: 'Senator',
+    state: 'Nevada',
+    photo: 'https://www.cortezmasto.senate.gov/imo/media/image/cortez-masto-headshot.jpg',
+    website: 'https://www.cortezmasto.senate.gov/',
+    votingRecord: { progressive: 85, bipartisan: 65 }
+  },
+  {
+    id: 'rosen-nv',
+    name: 'Jacky Rosen',
+    party: 'Democratic',
+    position: 'Senator',
+    state: 'Nevada',
+    photo: 'https://www.rosen.senate.gov/files/images/rosen_headshot.jpg',
+    website: 'https://www.rosen.senate.gov/',
+    votingRecord: { progressive: 80, bipartisan: 70 }
+  },
+  {
+    id: 'tester-mt',
+    name: 'Jon Tester',
+    party: 'Democratic',
+    position: 'Senator',
+    state: 'Montana',
+    photo: 'https://www.tester.senate.gov/files/images/tester_headshot.jpg',
+    website: 'https://www.tester.senate.gov/',
+    votingRecord: { progressive: 60, bipartisan: 85 }
+  },
+  {
+    id: 'takano-ca',
+    name: 'Mark Takano',
+    party: 'Democratic',
+    position: 'Representative',
+    state: 'California',
+    district: '39th',
+    photo: 'https://takano.house.gov/sites/takano.house.gov/files/Takano_Official.jpg',
+    website: 'https://takano.house.gov/',
+    votingRecord: { progressive: 95, bipartisan: 40 }
+  }
+];
 
 const sampleLegislation = [
   // Federal Legislation
@@ -19,7 +85,13 @@ const sampleLegislation = [
     timeline: '6-12 months',
     confidence: 75,
     isBenefit: true,
-    description: 'Extends and expands the Low-Income Housing Tax Credit program to increase affordable housing development nationwide.'
+    description: 'Extends and expands the Low-Income Housing Tax Credit program to increase affordable housing development nationwide.',
+    sponsor: 'sanders-vt',
+    cosponsors: ['warren-ma', 'cortez-masto-nv'],
+    votingRecord: {
+      committee: { yes: 12, no: 8, abstain: 2 },
+      lastAction: 'Referred to Committee on Banking, Housing, and Urban Affairs'
+    }
   },
   {
     id: 2,
@@ -32,7 +104,14 @@ const sampleLegislation = [
     timeline: '3-6 months',
     confidence: 90,
     isBenefit: true,
-    description: 'Provides federal subsidies to cap healthcare premiums for families earning between $50,000-$125,000 annually.'
+    description: 'Provides federal subsidies to cap healthcare premiums for families earning between $50,000-$125,000 annually.',
+    sponsor: 'warren-ma',
+    cosponsors: ['sanders-vt', 'rosen-nv'],
+    votingRecord: {
+      senate: { yes: 52, no: 48, abstain: 0 },
+      house: { yes: 224, no: 211, abstain: 0 },
+      lastAction: 'Signed into law'
+    }
   },
   {
     id: 3,
@@ -45,7 +124,13 @@ const sampleLegislation = [
     timeline: '12+ months',
     confidence: 45,
     isBenefit: false,
-    description: 'Proposes increasing federal gas tax by 15 cents per gallon to fund infrastructure improvements.'
+    description: 'Proposes increasing federal gas tax by 15 cents per gallon to fund infrastructure improvements.',
+    sponsor: 'tester-mt',
+    cosponsors: [],
+    votingRecord: {
+      committee: { yes: 8, no: 14, abstain: 0 },
+      lastAction: 'Proposal under review'
+    }
   },
   
   // Veteran Affairs
@@ -60,7 +145,13 @@ const sampleLegislation = [
     timeline: '6-12 months',
     confidence: 80,
     isBenefit: true,
-    description: 'Expands VA disability coverage for burn pit exposure, PTSD, and increases monthly compensation by 15%.'
+    description: 'Expands VA disability coverage for burn pit exposure, PTSD, and increases monthly compensation by 15%.',
+    sponsor: 'takano-ca',
+    cosponsors: ['tester-mt', 'cortez-masto-nv'],
+    votingRecord: {
+      committee: { yes: 18, no: 4, abstain: 0 },
+      lastAction: 'Referred to Committee on Veterans\' Affairs'
+    }
   },
   {
     id: 5,
@@ -73,7 +164,14 @@ const sampleLegislation = [
     timeline: '3-6 months',
     confidence: 95,
     isBenefit: true,
-    description: 'Enhances Thrift Savings Plan matching for military members and provides earlier pension access options.'
+    description: 'Enhances Thrift Savings Plan matching for military members and provides earlier pension access options.',
+    sponsor: 'takano-ca',
+    cosponsors: ['tester-mt', 'sanders-vt'],
+    votingRecord: {
+      senate: { yes: 87, no: 13, abstain: 0 },
+      house: { yes: 398, no: 37, abstain: 0 },
+      lastAction: 'Signed into law'
+    }
   },
 
   // Nevada State Legislation
@@ -187,6 +285,8 @@ function MainApp() {
   const [activeScope, setActiveScope] = useState('All Levels');
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [useAI, setUseAI] = useState(false);
+  const [selectedBills, setSelectedBills] = useState([]);
+  const [showComparison, setShowComparison] = useState(false);
   
   const filteredLegislation = sampleLegislation.filter(item => {
     const matchesCategory = activeFilter === 'All Issues' || item.category === activeFilter;
@@ -234,6 +334,50 @@ function MainApp() {
     politicalInterests: userProfile.political_interests || []
   };
 
+  // Find user's representatives based on location
+  const getUserRepresentatives = () => {
+    if (!userProfile?.location) return [];
+    
+    const location = userProfile.location.toLowerCase();
+    const representatives = [];
+    
+    // Add all federal representatives (they represent everyone)
+    const federalReps = samplePoliticians.filter(p => 
+      p.position === 'Senator' || p.position === 'Representative'
+    );
+    
+    // Add state-specific representatives
+    const stateReps = samplePoliticians.filter(p => {
+      if (!p.state) return false;
+      const politicianState = p.state.toLowerCase();
+      return location.includes(politicianState) || 
+             location.includes(politicianState.split(' ')[0]); // Handle "Las Vegas, NV" -> "Nevada"
+    });
+    
+    return [...new Set([...federalReps, ...stateReps])]; // Remove duplicates
+  };
+
+  const userRepresentatives = getUserRepresentatives();
+
+  // Bill comparison functions
+  const handleBillSelection = (bill, isSelected) => {
+    if (isSelected) {
+      setSelectedBills(prev => [...prev, bill]);
+    } else {
+      setSelectedBills(prev => prev.filter(b => b.id !== bill.id));
+    }
+  };
+
+  const clearSelectedBills = () => {
+    setSelectedBills([]);
+  };
+
+  const openComparison = () => {
+    if (selectedBills.length > 1) {
+      setShowComparison(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
@@ -264,6 +408,37 @@ function MainApp() {
           )}
         </div>
       </div>
+      
+      {/* User Representatives Section */}
+      {userRepresentatives.length > 0 && (
+        <div className="bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-900">Your Representatives</h3>
+            <span className="text-xs text-gray-500">
+              Based on your location: {userProfile.location}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {userRepresentatives.slice(0, 6).map((rep) => (
+              <div key={rep.id} className="bg-gray-50 rounded-lg p-3">
+                <PoliticianCard 
+                  politician={rep} 
+                  size="medium" 
+                  showVotingRecord={false}
+                />
+              </div>
+            ))}
+          </div>
+          {userRepresentatives.length > 6 && (
+            <div className="text-center mt-2">
+              <span className="text-xs text-gray-500">
+                + {userRepresentatives.length - 6} more representatives
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+      
       <FilterBar 
         activeFilter={activeFilter} 
         onFilterChange={setActiveFilter}
@@ -275,7 +450,10 @@ function MainApp() {
           <LegislationCard 
             key={legislation.id} 
             legislation={legislation} 
+            politicians={samplePoliticians}
             useAI={useAI}
+            isSelected={selectedBills.some(b => b.id === legislation.id)}
+            onSelectionChange={(isSelected) => handleBillSelection(legislation, isSelected)}
           />
         ))}
         {filteredLegislation.length === 0 && (
@@ -284,6 +462,55 @@ function MainApp() {
           </div>
         )}
       </main>
+
+      {/* Floating Comparison Bar */}
+      {selectedBills.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 z-40">
+          <div className="flex items-center justify-between max-w-6xl mx-auto">
+            <div className="flex items-center space-x-4">
+              <span className="text-sm font-medium text-gray-900">
+                {selectedBills.length} bill{selectedBills.length !== 1 ? 's' : ''} selected for comparison
+              </span>
+              <div className="flex space-x-2">
+                {selectedBills.slice(0, 3).map((bill, index) => (
+                  <div key={bill.id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                    {bill.title.length > 20 ? bill.title.substring(0, 20) + '...' : bill.title}
+                  </div>
+                ))}
+                {selectedBills.length > 3 && (
+                  <div className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                    +{selectedBills.length - 3} more
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={clearSelectedBills}
+                className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-800"
+              >
+                Clear
+              </button>
+              <button
+                onClick={openComparison}
+                disabled={selectedBills.length < 2}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Compare Bills ({selectedBills.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comparison Modal */}
+      <ComparisonModal
+        isOpen={showComparison}
+        onClose={() => setShowComparison(false)}
+        selectedBills={selectedBills}
+        politicians={samplePoliticians}
+        userProfile={userProfile}
+      />
     </div>
   );
 }
