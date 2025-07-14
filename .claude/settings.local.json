@@ -6,7 +6,8 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:api.congress.gov)",
       "Bash(npm run build:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git restore:*)"
     ],
     "deny": []
   }
