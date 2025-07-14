@@ -3,7 +3,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://voterimpact.verce
 
 export const analyzePersonalImpact = async (legislation, userProfile) => {
   try {
-    const prompt = `You are a legislative impact analyst specializing in personalized assessments. Analyze how this legislation specifically affects this person and provide a detailed, personalized assessment.
+    const prompt = `You are a legislative impact analyst specializing in personalized assessments. Analyze how this legislation specifically affects this person and provide a detailed, personalized assessment written in SECOND PERSON (using "you/your").
 
 LEGISLATION:
 Title: ${legislation.title}
@@ -39,16 +39,18 @@ LOCATION-SPECIFIC FACTORS:
 - Evaluate regional economic conditions
 - Consider local industry impacts (${userProfile.location.includes('Nevada') || userProfile.location.includes('Las Vegas') ? 'gaming/tourism industry,' : ''} cost of living variations)
 
+IMPORTANT: Write the personalImpact in SECOND PERSON perspective, directly addressing the user as "you". For example: "You would benefit from..." or "Your monthly costs would decrease by..." NOT "Steven would benefit..." or "The user would see..."
+
 Please provide a JSON response with the following structure:
 {
-  "personalImpact": "A detailed 2-3 sentence explanation of how this legislation specifically affects this person based on their profile, veteran status, and location",
+  "personalImpact": "A detailed 2-3 sentence explanation written in SECOND PERSON (you/your) of how this legislation specifically affects the user based on their profile, veteran status, and location",
   "financialEffect": 0, // Estimated annual financial impact in dollars (positive for savings/benefits, negative for costs)
   "timeline": "3-6 months", // When this person would likely see the impact
   "confidence": 75, // Confidence level 0-100 in this analysis
   "isBenefit": true // true if generally positive, false if generally negative
 }
 
-Consider their location-specific factors, income level, age, employment, veteran status, and interests when making your analysis. Be specific about dollar amounts when possible, and explain your reasoning in the personalImpact field. For veterans, always consider VA benefits, military retirement, and veteran-specific tax implications.`;
+Consider their location-specific factors, income level, age, employment, veteran status, and interests when making your analysis. Be specific about dollar amounts when possible, and explain your reasoning in the personalImpact field using "you/your" language. For veterans, always consider VA benefits, military retirement, and veteran-specific tax implications.`;
 
     // Call backend API instead of Anthropic directly
     const response = await fetch(`${API_BASE_URL}/api/anthropic/analyze`, {
