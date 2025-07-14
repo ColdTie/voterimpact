@@ -1,5 +1,5 @@
 // API endpoint for backend server
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://voterimpact.vercel.app';
 
 export const analyzePersonalImpact = async (legislation, userProfile) => {
   try {
