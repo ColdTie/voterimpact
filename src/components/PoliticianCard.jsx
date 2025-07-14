@@ -25,7 +25,7 @@ const PoliticianCard = ({ politician, size = 'small', showVotingRecord = false }
     <div className={`flex items-center space-x-2 ${size === 'large' ? 'p-4 border rounded-lg' : ''}`}>
       <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-200 flex-shrink-0`}>
         <img
-          src={politician.photo}
+          src={politician.photo_url || politician.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(politician.name)}&background=6366f1&color=fff`}
           alt={politician.name}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -41,8 +41,8 @@ const PoliticianCard = ({ politician, size = 'small', showVotingRecord = false }
         
         {size !== 'small' && (
           <div className={`text-gray-500 truncate ${size === 'large' ? 'text-sm' : 'text-xs'}`}>
-            {politician.position} - {politician.state}
-            {politician.district && ` (${politician.district})`}
+            {politician.title || politician.position} - {politician.state}
+            {politician.district && ` (District ${politician.district})`}
           </div>
         )}
         

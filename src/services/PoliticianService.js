@@ -38,8 +38,8 @@ class PoliticianService {
 
   async getRealPoliticians(userLocation) {
     if (!userLocation) {
-      // Default to user's state if available, otherwise get all
-      userLocation = { state: 'NV' }; // Could get from user profile
+      // No default state - require location to be passed in
+      throw new Error('User location is required for accurate representative lookup');
     }
 
     const params = new URLSearchParams();
@@ -73,7 +73,7 @@ class PoliticianService {
         party: 'Independent',
         state: 'Vermont',
         office: 'U.S. Senate',
-        photo_url: 'https://bioguideretro.congress.gov/Static/Images/R000122.jpg',
+        photo_url: 'https://theunitedstates.io/images/congress/450x550/S000033.jpg',
         phone: '(202) 224-5141',
         email: 'senator@sanders.senate.gov',
         website: 'https://www.sanders.senate.gov',
@@ -91,7 +91,7 @@ class PoliticianService {
         party: 'Democratic',
         state: 'Massachusetts',
         office: 'U.S. Senate',
-        photo_url: 'https://bioguideretro.congress.gov/Static/Images/W000817.jpg',
+        photo_url: 'https://theunitedstates.io/images/congress/450x550/W000817.jpg',
         phone: '(202) 224-4543',
         email: 'senator_warren@warren.senate.gov',
         website: 'https://www.warren.senate.gov',
@@ -109,7 +109,7 @@ class PoliticianService {
         party: 'Democratic',
         state: 'Nevada',
         office: 'U.S. Senate',
-        photo_url: 'https://bioguideretro.congress.gov/Static/Images/C001113.jpg',
+        photo_url: 'https://theunitedstates.io/images/congress/450x550/C001113.jpg',
         phone: '(202) 224-3542',
         email: 'senator@cortezmasto.senate.gov',
         website: 'https://www.cortezmasto.senate.gov',
@@ -127,7 +127,7 @@ class PoliticianService {
         party: 'Democratic',
         state: 'Nevada',
         office: 'U.S. Senate',
-        photo_url: 'https://bioguideretro.congress.gov/Static/Images/R000608.jpg',
+        photo_url: 'https://theunitedstates.io/images/congress/450x550/R000608.jpg',
         phone: '(202) 224-6244',
         email: 'senator_rosen@rosen.senate.gov',
         website: 'https://www.rosen.senate.gov',
@@ -145,7 +145,7 @@ class PoliticianService {
         party: 'Democratic',
         state: 'Montana',
         office: 'U.S. Senate',
-        photo_url: 'https://bioguideretro.congress.gov/Static/Images/T000464.jpg',
+        photo_url: 'https://theunitedstates.io/images/congress/450x550/T000464.jpg',
         phone: '(202) 224-2644',
         email: 'senator@tester.senate.gov',
         website: 'https://www.tester.senate.gov',
@@ -163,7 +163,7 @@ class PoliticianService {
         party: 'Democratic',
         state: 'California',
         office: 'U.S. House',
-        photo_url: 'https://bioguideretro.congress.gov/Static/Images/T000472.jpg',
+        photo_url: 'https://theunitedstates.io/images/congress/450x550/T000472.jpg',
         phone: '(202) 225-2305',
         email: 'rep.takano@takano.house.gov',
         website: 'https://takano.house.gov',

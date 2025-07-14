@@ -81,6 +81,57 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
     return politicians.find(p => p.id === id);
   };
 
+  const getCongressUrl = () => {
+    if (!legislation.congress || !legislation.chamber || !legislation.billNumber) {
+      return null;
+    }
+    
+    // Extract bill number from full bill designation (e.g., "S.1234" -> "1234", "H.R.789" -> "789")
+    const billNum = legislation.billNumber.replace(/[A-Z.]/g, '');
+    const chamberMap = {
+      'senate': 'senate-bill',
+      'house': 'house-bill'
+    };
+    
+    return `https://www.congress.gov/bill/${legislation.congress}th-congress/${chamberMap[legislation.chamber]}/${billNum}`;
+  };
+
+  const VoteCountBadge = ({ votes, chamber, isClickable = true }) => {
+    const congressUrl = getCongressUrl();
+    const handleClick = () => {
+      if (congressUrl && isClickable) {
+        window.open(congressUrl, '_blank', 'noopener,noreferrer');
+      }
+    };
+
+    const voteElement = (
+      <div className={`flex space-x-2 ${isClickable && congressUrl ? 'cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 transition-colors' : ''}`}>
+        <span className="text-green-600">✓ {votes.yes}</span>
+        <span className="text-red-600">✗ {votes.no}</span>
+        {votes.abstain > 0 && (
+          <span className="text-gray-500">- {votes.abstain}</span>
+        )}
+      </div>
+    );
+
+    if (isClickable && congressUrl) {
+      return (
+        <div 
+          onClick={handleClick}
+          className="relative group"
+          title={`Click to view full bill on Congress.gov`}
+        >
+          {voteElement}
+          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+            View on Congress.gov
+          </div>
+        </div>
+      );
+    }
+
+    return voteElement;
+  };
+
   const sponsor = findPolitician(legislation.sponsor);
   const cosponsors = legislation.cosponsors ? legislation.cosponsors.map(findPolitician).filter(Boolean) : [];
 
@@ -108,6 +159,15 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          {getCongressUrl() && (
+            <button
+              onClick={() => window.open(getCongressUrl(), '_blank', 'noopener,noreferrer')}
+              className="text-xs text-blue-600 hover:text-blue-800 font-medium border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
+              title="View full bill on Congress.gov"
+            >
+              📄 View Bill
+            </button>
+          )}
           {onSelectionChange && (
             <label className="flex items-center">
               <input
@@ -172,39 +232,21 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
             {legislation.votingRecord.committee && (
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">Committee Vote:</span>
-                <div className="flex space-x-2">
-                  <span className="text-green-600">✓ {legislation.votingRecord.committee.yes}</span>
-                  <span className="text-red-600">✗ {legislation.votingRecord.committee.no}</span>
-                  {legislation.votingRecord.committee.abstain > 0 && (
-                    <span className="text-gray-500">- {legislation.votingRecord.committee.abstain}</span>
-                  )}
-                </div>
+                <VoteCountBadge votes={legislation.votingRecord.committee} chamber="committee" />
               </div>
             )}
             
             {legislation.votingRecord.senate && (
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">Senate Vote:</span>
-                <div className="flex space-x-2">
-                  <span className="text-green-600">✓ {legislation.votingRecord.senate.yes}</span>
-                  <span className="text-red-600">✗ {legislation.votingRecord.senate.no}</span>
-                  {legislation.votingRecord.senate.abstain > 0 && (
-                    <span className="text-gray-500">- {legislation.votingRecord.senate.abstain}</span>
-                  )}
-                </div>
+                <VoteCountBadge votes={legislation.votingRecord.senate} chamber="senate" />
               </div>
             )}
             
             {legislation.votingRecord.house && (
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">House Vote:</span>
-                <div className="flex space-x-2">
-                  <span className="text-green-600">✓ {legislation.votingRecord.house.yes}</span>
-                  <span className="text-red-600">✗ {legislation.votingRecord.house.no}</span>
-                  {legislation.votingRecord.house.abstain > 0 && (
-                    <span className="text-gray-500">- {legislation.votingRecord.house.abstain}</span>
-                  )}
-                </div>
+                <VoteCountBadge votes={legislation.votingRecord.house} chamber="house" />
               </div>
             )}
           </div>

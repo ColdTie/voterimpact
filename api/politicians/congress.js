@@ -83,7 +83,8 @@ export default async function handler(req, res) {
       phone: member.phone || '',
       email: member.email || '',
       website: member.officialWebsiteUrl || '',
-      photo_url: member.depiction?.imageUrl || `https://www.congress.gov/img/member/${member.bioguideId?.toLowerCase()}.jpg`,
+      photo_url: member.depiction?.imageUrl || 
+        `https://theunitedstates.io/images/congress/450x550/${member.bioguideId}.jpg`,
       voting_record: {
         progressive_percentage: null, // Will be enhanced by AI later
         bipartisan_percentage: null,

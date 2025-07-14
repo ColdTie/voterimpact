@@ -4,7 +4,9 @@
       "Bash(ls:*)",
       "Bash(git add:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:api.congress.gov)"
+      "WebFetch(domain:api.congress.gov)",
+      "Bash(npm run build:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

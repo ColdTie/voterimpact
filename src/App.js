@@ -89,6 +89,9 @@ const sampleLegislation = [
     description: 'Extends and expands the Low-Income Housing Tax Credit program to increase affordable housing development nationwide.',
     sponsor: 'sanders-vt',
     cosponsors: ['warren-ma', 'cortez-masto-nv'],
+    congress: 118,
+    chamber: 'senate',
+    billNumber: 'S.1234',
     votingRecord: {
       committee: { yes: 12, no: 8, abstain: 2 },
       lastAction: 'Referred to Committee on Banking, Housing, and Urban Affairs'
@@ -108,6 +111,9 @@ const sampleLegislation = [
     description: 'Provides federal subsidies to cap healthcare premiums for families earning between $50,000-$125,000 annually.',
     sponsor: 'warren-ma',
     cosponsors: ['sanders-vt', 'rosen-nv'],
+    congress: 118,
+    chamber: 'senate',
+    billNumber: 'S.2456',
     votingRecord: {
       senate: { yes: 52, no: 48, abstain: 0 },
       house: { yes: 224, no: 211, abstain: 0 },
@@ -128,6 +134,9 @@ const sampleLegislation = [
     description: 'Proposes increasing federal gas tax by 15 cents per gallon to fund infrastructure improvements.',
     sponsor: 'tester-mt',
     cosponsors: [],
+    congress: 118,
+    chamber: 'house',
+    billNumber: 'H.R.789',
     votingRecord: {
       committee: { yes: 8, no: 14, abstain: 0 },
       lastAction: 'Proposal under review'
@@ -149,6 +158,9 @@ const sampleLegislation = [
     description: 'Expands VA disability coverage for burn pit exposure, PTSD, and increases monthly compensation by 15%.',
     sponsor: 'takano-ca',
     cosponsors: ['tester-mt', 'cortez-masto-nv'],
+    congress: 118,
+    chamber: 'house',
+    billNumber: 'H.R.3456',
     votingRecord: {
       committee: { yes: 18, no: 4, abstain: 0 },
       lastAction: 'Referred to Committee on Veterans\' Affairs'
@@ -168,6 +180,9 @@ const sampleLegislation = [
     description: 'Enhances Thrift Savings Plan matching for military members and provides earlier pension access options.',
     sponsor: 'takano-ca',
     cosponsors: ['tester-mt', 'sanders-vt'],
+    congress: 118,
+    chamber: 'house',
+    billNumber: 'H.R.5678',
     votingRecord: {
       senate: { yes: 87, no: 13, abstain: 0 },
       house: { yes: 398, no: 37, abstain: 0 },
@@ -297,11 +312,36 @@ function MainApp() {
   const extractStateFromLocation = useCallback((location) => {
     if (!location) return null;
     const locationLower = location.toLowerCase();
-    if (locationLower.includes('nevada') || locationLower.includes('nv')) return 'NV';
-    if (locationLower.includes('california') || locationLower.includes('ca')) return 'CA';
-    if (locationLower.includes('vermont') || locationLower.includes('vt')) return 'VT';
-    if (locationLower.includes('massachusetts') || locationLower.includes('ma')) return 'MA';
-    if (locationLower.includes('montana') || locationLower.includes('mt')) return 'MT';
+    
+    // State name to abbreviation mapping
+    const stateMap = {
+      'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+      'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+      'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+      'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+      'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+      'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+      'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+      'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+      'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+      'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY'
+    };
+    
+    // First try to find full state names
+    for (const [stateName, stateCode] of Object.entries(stateMap)) {
+      if (locationLower.includes(stateName)) {
+        return stateCode;
+      }
+    }
+    
+    // Then look for state abbreviations (2-letter codes at word boundaries)
+    const stateAbbreviations = Object.values(stateMap);
+    const stateRegex = new RegExp(`\\b(${stateAbbreviations.join('|')})\\b`, 'i');
+    const match = location.match(stateRegex);
+    if (match) {
+      return match[1].toUpperCase();
+    }
+    
     return null;
   }, []);
   
