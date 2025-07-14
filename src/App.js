@@ -8,6 +8,7 @@ import UserProfileForm from './components/UserProfileForm';
 import PoliticianCard from './components/PoliticianCard';
 import ComparisonModal from './components/ComparisonModal';
 import PoliticianService from './services/PoliticianService';
+import { useRepresentatives } from './hooks/useRepresentatives';
 
 const samplePoliticians = [
   {
@@ -303,6 +304,13 @@ function MainApp() {
   const [useAI, setUseAI] = useState(false);
   const [selectedBills, setSelectedBills] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
+
+  // Use the new representatives hook for accurate location-based lookup (must be before early returns)
+  const { 
+    representatives: userRepresentatives, 
+    loading: representativesLoading, 
+    error: representativesError 
+  } = useRepresentatives(userProfile?.location);
   
   // Dynamic politician loading with fallback to static data
   const [politicians, setPoliticians] = useState(samplePoliticians);
@@ -416,30 +424,6 @@ function MainApp() {
     politicalInterests: userProfile.political_interests || []
   };
 
-  // Find user's representatives based on location
-  const getUserRepresentatives = () => {
-    if (!userProfile?.location) return [];
-    
-    const location = userProfile.location.toLowerCase();
-    const representatives = [];
-    
-    // Add all federal representatives (they represent everyone)
-    const federalReps = politicians.filter(p => 
-      p.title === 'Senator' || p.title === 'Representative' || p.position === 'Senator' || p.position === 'Representative'
-    );
-    
-    // Add state-specific representatives
-    const stateReps = politicians.filter(p => {
-      if (!p.state) return false;
-      const politicianState = p.state.toLowerCase();
-      return location.includes(politicianState) || 
-             location.includes(politicianState.split(' ')[0]); // Handle "Las Vegas, NV" -> "Nevada"
-    });
-    
-    return [...new Set([...federalReps, ...stateReps])]; // Remove duplicates
-  };
-
-  const userRepresentatives = getUserRepresentatives();
 
   // Bill comparison functions
   const handleBillSelection = (bill, isSelected) => {
@@ -492,7 +476,7 @@ function MainApp() {
       </div>
       
       {/* User Representatives Section */}
-      {userRepresentatives.length > 0 && (
+      {userProfile?.location && (
         <div className="bg-white border-b border-gray-200 px-4 py-3">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-900">Your Representatives</h3>
@@ -500,22 +484,73 @@ function MainApp() {
               Based on your location: {userProfile.location}
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {userRepresentatives.slice(0, 6).map((rep) => (
-              <div key={rep.id} className="bg-gray-50 rounded-lg p-3">
-                <PoliticianCard 
-                  politician={rep} 
-                  size="medium" 
-                  showVotingRecord={false}
-                />
+          
+          {representativesLoading && (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-sm text-gray-600">Loading your representatives...</span>
+            </div>
+          )}
+          
+          {representativesError && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
+              <div className="text-sm text-yellow-800">
+                <strong>Note:</strong> Unable to fetch current representatives. Please visit{' '}
+                <a href="https://www.house.gov/representatives/find-your-representative" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   className="underline">
+                  house.gov
+                </a> to find your representatives.
               </div>
-            ))}
-          </div>
-          {userRepresentatives.length > 6 && (
-            <div className="text-center mt-2">
-              <span className="text-xs text-gray-500">
-                + {userRepresentatives.length - 6} more representatives
-              </span>
+            </div>
+          )}
+          
+          {!representativesLoading && userRepresentatives.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {userRepresentatives.map((rep) => (
+                  <div key={rep.id} className="bg-gray-50 rounded-lg p-3">
+                    <PoliticianCard 
+                      politician={rep} 
+                      size="medium" 
+                      showVotingRecord={false}
+                    />
+                    {rep.note && (
+                      <div className="mt-2 text-xs text-gray-600 italic">
+                        {rep.note}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              {userRepresentatives.some(rep => rep.source === 'google-civic') && (
+                <div className="mt-2 text-xs text-gray-500 text-center">
+                  ✓ Current representatives from official sources
+                </div>
+              )}
+              
+              {userRepresentatives.some(rep => rep.source === 'fallback') && (
+                <div className="mt-2 text-xs text-yellow-600 text-center">
+                  ⚠ Using fallback data. For most current info, visit official government sites.
+                </div>
+              )}
+            </>
+          )}
+          
+          {!representativesLoading && !representativesError && userRepresentatives.length === 0 && (
+            <div className="text-center py-4 text-gray-600">
+              <p className="text-sm">No representatives found for your location.</p>
+              <p className="text-xs mt-1">
+                Visit{' '}
+                <a href="https://www.house.gov/representatives/find-your-representative" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   className="text-blue-600 underline">
+                  house.gov
+                </a> to find your representatives.
+              </p>
             </div>
           )}
         </div>
