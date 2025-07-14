@@ -36,7 +36,7 @@ Please provide a JSON response with the following structure:
 Consider their location, income level, age, employment, and interests when making your analysis. Be specific about dollar amounts when possible, and explain your reasoning in the personalImpact field.`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1000,
       messages: [
         {
@@ -106,7 +106,7 @@ Provide a JSON response with:
 }`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 800,
       messages: [
         {
