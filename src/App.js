@@ -46,6 +46,7 @@ function MainApp() {
   const { user, userProfile, loading } = useAuth();
   const [activeFilter, setActiveFilter] = useState('All Issues');
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [useAI, setUseAI] = useState(false);
   
   const filteredLegislation = activeFilter === 'All Issues' 
     ? sampleLegislation 
@@ -91,10 +92,38 @@ function MainApp() {
         user={displayUser} 
         onEditProfile={() => setShowProfileForm(true)}
       />
+      <div className="bg-white border-b border-gray-200 px-4 py-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="ai-toggle"
+              checked={useAI}
+              onChange={(e) => setUseAI(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="ai-toggle" className="text-sm font-medium text-gray-700">
+              AI-Powered Personal Analysis
+            </label>
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              Claude
+            </span>
+          </div>
+          {useAI && (
+            <div className="text-xs text-gray-500">
+              Analysis powered by Claude AI
+            </div>
+          )}
+        </div>
+      </div>
       <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
       <main className="pb-6">
         {filteredLegislation.map((legislation) => (
-          <LegislationCard key={legislation.id} legislation={legislation} />
+          <LegislationCard 
+            key={legislation.id} 
+            legislation={legislation} 
+            useAI={useAI}
+          />
         ))}
         {filteredLegislation.length === 0 && (
           <div className="text-center py-12">

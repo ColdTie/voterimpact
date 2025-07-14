@@ -1,15 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { analyzePersonalImpact } from '../services/claudeService';
 
-const LegislationCard = ({ legislation }) => {
+const LegislationCard = ({ legislation, useAI = false }) => {
+  const { userProfile } = useAuth();
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const {
     title,
     status,
-    personalImpact,
-    timeline,
-    confidence,
-    financialEffect,
-    isBenefit
+    personalImpact: defaultPersonalImpact,
+    timeline: defaultTimeline,
+    confidence: defaultConfidence,
+    financialEffect: defaultFinancialEffect,
+    isBenefit: defaultIsBenefit
   } = legislation;
+
+  // Use AI analysis if available, otherwise fall back to defaults
+  const personalImpact = analysis?.personalImpact || defaultPersonalImpact;
+  const timeline = analysis?.timeline || defaultTimeline;
+  const confidence = analysis?.confidence || defaultConfidence;
+  const financialEffect = analysis?.financialEffect || defaultFinancialEffect;
+  const isBenefit = analysis?.isBenefit !== undefined ? analysis.isBenefit : defaultIsBenefit;
+
+  useEffect(() => {
+    if (useAI && userProfile && !analysis && !loading) {
+      generatePersonalImpact();
+    }
+  }, [useAI, userProfile, analysis, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const generatePersonalImpact = async () => {
+    if (!userProfile) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await analyzePersonalImpact(legislation, userProfile);
+      
+      if (result.success) {
+        setAnalysis(result.data);
+      } else {
+        setError(result.error);
+        setAnalysis(result.data); // Use fallback data
+      }
+    } catch (err) {
+      setError('Failed to analyze personal impact');
+      console.error('Error generating personal impact:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -43,7 +86,29 @@ const LegislationCard = ({ legislation }) => {
       </div>
 
       <div className="bg-gray-50 rounded-lg p-3 mb-3">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Personal Impact</h4>
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-sm font-medium text-gray-700">Personal Impact</h4>
+          {useAI && (
+            <div className="flex items-center space-x-2">
+              {loading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              )}
+              <button
+                onClick={generatePersonalImpact}
+                disabled={loading}
+                className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              >
+                {analysis ? 'Refresh AI Analysis' : 'Generate AI Analysis'}
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {error && (
+          <div className="text-xs text-red-600 mb-2 p-2 bg-red-50 rounded">
+            {error}
+          </div>
+        )}
         
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm text-gray-600">Financial Effect:</span>
@@ -81,9 +146,18 @@ const LegislationCard = ({ legislation }) => {
       </div>
 
       {personalImpact && (
-        <p className="text-sm text-gray-700 leading-relaxed">
-          {personalImpact}
-        </p>
+        <div className="relative">
+          <p className="text-sm text-gray-700 leading-relaxed">
+            {personalImpact}
+          </p>
+          {useAI && analysis && (
+            <div className="absolute top-0 right-0">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                AI Analysis
+              </span>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
