@@ -7,33 +7,52 @@ const anthropic = new Anthropic({
 
 export const analyzePersonalImpact = async (legislation, userProfile) => {
   try {
-    const prompt = `You are a legislative impact analyst. Analyze how this legislation specifically affects this person and provide a personalized assessment.
+    const prompt = `You are a legislative impact analyst specializing in personalized assessments. Analyze how this legislation specifically affects this person and provide a detailed, personalized assessment.
 
 LEGISLATION:
 Title: ${legislation.title}
 Status: ${legislation.status}
 Category: ${legislation.category}
+Scope: ${legislation.scope || 'Federal'} level legislation
+Location: ${legislation.location || 'Nationwide'}
 Description: ${legislation.description || 'No description provided'}
 
 USER PROFILE:
 Name: ${userProfile.name}
 Age: ${userProfile.age}
 Location: ${userProfile.location}
+Annual Income: $${(userProfile.monthly_income || 0) * 12}
 Monthly Income: $${userProfile.monthly_income || 0}
 Company: ${userProfile.company || 'Not specified'}
 Veteran Status: ${userProfile.is_veteran ? 'Yes' : 'No'}
 Political Interests: ${userProfile.political_interests?.join(', ') || 'None specified'}
 
+ANALYSIS REQUIREMENTS:
+${userProfile.is_veteran ? `
+VETERAN-SPECIFIC CONSIDERATIONS:
+- Analyze VA benefit interactions and eligibility changes
+- Consider military pension implications (TSP, retirement pay)
+- Account for veteran tax benefits and exemptions
+- Evaluate veteran-specific programs and services
+- Consider VA healthcare and disability compensation impacts
+` : ''}
+
+LOCATION-SPECIFIC FACTORS:
+- Consider cost of living in ${userProfile.location}
+- Account for state and local tax implications
+- Evaluate regional economic conditions
+- Consider local industry impacts (${userProfile.location.includes('Nevada') || userProfile.location.includes('Las Vegas') ? 'gaming/tourism industry,' : ''} cost of living variations)
+
 Please provide a JSON response with the following structure:
 {
-  "personalImpact": "A detailed 2-3 sentence explanation of how this legislation specifically affects this person based on their profile",
+  "personalImpact": "A detailed 2-3 sentence explanation of how this legislation specifically affects this person based on their profile, veteran status, and location",
   "financialEffect": 0, // Estimated annual financial impact in dollars (positive for savings/benefits, negative for costs)
   "timeline": "3-6 months", // When this person would likely see the impact
   "confidence": 75, // Confidence level 0-100 in this analysis
   "isBenefit": true // true if generally positive, false if generally negative
 }
 
-Consider their location, income level, age, employment, and interests when making your analysis. Be specific about dollar amounts when possible, and explain your reasoning in the personalImpact field.`;
+Consider their location-specific factors, income level, age, employment, veteran status, and interests when making your analysis. Be specific about dollar amounts when possible, and explain your reasoning in the personalImpact field. For veterans, always consider VA benefits, military retirement, and veteran-specific tax implications.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
