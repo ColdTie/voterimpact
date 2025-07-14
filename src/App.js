@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import FilterBar from './components/FilterBar';
@@ -7,6 +7,7 @@ import AuthWrapper from './components/Auth/AuthWrapper';
 import UserProfileForm from './components/UserProfileForm';
 import PoliticianCard from './components/PoliticianCard';
 import ComparisonModal from './components/ComparisonModal';
+import PoliticianService from './services/PoliticianService';
 
 const samplePoliticians = [
   {
@@ -288,6 +289,47 @@ function MainApp() {
   const [selectedBills, setSelectedBills] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
   
+  // Dynamic politician loading with fallback to static data
+  const [politicians, setPoliticians] = useState(samplePoliticians);
+  const [politiciansLoading, setPoliticiansLoading] = useState(false);
+  
+  // Load politicians when component mounts or when user location changes
+  useEffect(() => {
+    loadPoliticians();
+  }, [userProfile?.location, loadPoliticians]);
+  
+  const loadPoliticians = async () => {
+    try {
+      setPoliticiansLoading(true);
+      
+      const userLocation = userProfile?.location ? {
+        state: extractStateFromLocation(userProfile.location),
+        address: userProfile.location
+      } : null;
+      
+      const loadedPoliticians = await PoliticianService.getPoliticians(userLocation);
+      setPoliticians(loadedPoliticians);
+      
+    } catch (error) {
+      console.error('Failed to load politicians:', error);
+      // Keep existing samplePoliticians as fallback
+    } finally {
+      setPoliticiansLoading(false);
+    }
+  };
+  
+  // Helper to extract state from location string
+  const extractStateFromLocation = (location) => {
+    if (!location) return null;
+    const locationLower = location.toLowerCase();
+    if (locationLower.includes('nevada') || locationLower.includes('nv')) return 'NV';
+    if (locationLower.includes('california') || locationLower.includes('ca')) return 'CA';
+    if (locationLower.includes('vermont') || locationLower.includes('vt')) return 'VT';
+    if (locationLower.includes('massachusetts') || locationLower.includes('ma')) return 'MA';
+    if (locationLower.includes('montana') || locationLower.includes('mt')) return 'MT';
+    return null;
+  };
+  
   const filteredLegislation = sampleLegislation.filter(item => {
     const matchesCategory = activeFilter === 'All Issues' || item.category === activeFilter;
     const matchesScope = activeScope === 'All Levels' || item.scope === activeScope;
@@ -342,12 +384,12 @@ function MainApp() {
     const representatives = [];
     
     // Add all federal representatives (they represent everyone)
-    const federalReps = samplePoliticians.filter(p => 
-      p.position === 'Senator' || p.position === 'Representative'
+    const federalReps = politicians.filter(p => 
+      p.title === 'Senator' || p.title === 'Representative' || p.position === 'Senator' || p.position === 'Representative'
     );
     
     // Add state-specific representatives
-    const stateReps = samplePoliticians.filter(p => {
+    const stateReps = politicians.filter(p => {
       if (!p.state) return false;
       const politicianState = p.state.toLowerCase();
       return location.includes(politicianState) || 
@@ -450,7 +492,7 @@ function MainApp() {
           <LegislationCard 
             key={legislation.id} 
             legislation={legislation} 
-            politicians={samplePoliticians}
+            politicians={politicians}
             useAI={useAI}
             isSelected={selectedBills.some(b => b.id === legislation.id)}
             onSelectionChange={(isSelected) => handleBillSelection(legislation, isSelected)}
@@ -508,7 +550,7 @@ function MainApp() {
         isOpen={showComparison}
         onClose={() => setShowComparison(false)}
         selectedBills={selectedBills}
-        politicians={samplePoliticians}
+        politicians={politicians}
         userProfile={userProfile}
       />
     </div>
