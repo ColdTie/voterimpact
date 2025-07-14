@@ -1,9 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.REACT_APP_ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+// API endpoint for backend server
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 export const analyzePersonalImpact = async (legislation, userProfile) => {
   try {
@@ -54,45 +50,26 @@ Please provide a JSON response with the following structure:
 
 Consider their location-specific factors, income level, age, employment, veteran status, and interests when making your analysis. Be specific about dollar amounts when possible, and explain your reasoning in the personalImpact field. For veterans, always consider VA benefits, military retirement, and veteran-specific tax implications.`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
+    // Call backend API instead of Anthropic directly
+    const response = await fetch(`${API_BASE_URL}/api/anthropic/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt })
     });
 
-    const responseText = message.content[0].text;
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
     
-    // Parse the JSON response
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}') + 1;
-    
-    if (jsonStart === -1 || jsonEnd === 0) {
-      throw new Error('Could not find JSON in response');
+    if (!result.success) {
+      throw new Error(result.error || 'API request failed');
     }
     
-    const jsonResponse = responseText.substring(jsonStart, jsonEnd);
-    const analysis = JSON.parse(jsonResponse);
-    
-    // Validate the response structure
-    if (!analysis.personalImpact || typeof analysis.financialEffect !== 'number') {
-      throw new Error('Invalid response structure from Claude');
-    }
-    
-    return {
-      success: true,
-      data: {
-        personalImpact: analysis.personalImpact,
-        financialEffect: analysis.financialEffect,
-        timeline: analysis.timeline || 'Unknown',
-        confidence: analysis.confidence || 50,
-        isBenefit: analysis.isBenefit !== undefined ? analysis.isBenefit : null
-      }
-    };
+    return result;
     
   } catch (error) {
     console.error('Error analyzing personal impact:', error);
@@ -124,28 +101,26 @@ Provide a JSON response with:
   "keyPoints": ["Point 1", "Point 2", "Point 3"]
 }`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 800,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
+    // Call backend API instead of Anthropic directly
+    const response = await fetch(`${API_BASE_URL}/api/anthropic/summarize`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ legislationText })
     });
 
-    const responseText = message.content[0].text;
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}') + 1;
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
     
-    const jsonResponse = responseText.substring(jsonStart, jsonEnd);
-    const summary = JSON.parse(jsonResponse);
+    if (!result.success) {
+      throw new Error(result.error || 'API request failed');
+    }
     
-    return {
-      success: true,
-      data: summary
-    };
+    return result;
     
   } catch (error) {
     console.error('Error generating legislation summary:', error);
