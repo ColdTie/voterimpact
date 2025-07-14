@@ -89,18 +89,6 @@ Consider their location-specific factors, income level, age, employment, veteran
 
 export const generateLegislationSummary = async (legislationText) => {
   try {
-    const prompt = `Please summarize this legislation in simple terms that a regular voter can understand:
-
-${legislationText}
-
-Provide a JSON response with:
-{
-  "title": "Clear, concise title",
-  "summary": "2-3 sentence summary in plain English",
-  "category": "One of: Economic, Healthcare, Housing, Veterans Affairs, Social Issues, Environment",
-  "keyPoints": ["Point 1", "Point 2", "Point 3"]
-}`;
-
     // Call backend API instead of Anthropic directly
     const response = await fetch(`${API_BASE_URL}/api/anthropic/summarize`, {
       method: 'POST',
