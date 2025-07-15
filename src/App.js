@@ -118,7 +118,7 @@ const sampleLegislation = [
     confidence: 35,
     isBenefit: null,
     description: 'Enacted legislation providing federal healthcare premium subsidies for eligible income ranges. Specific impacts depend on individual circumstances and eligibility.',
-    summary: 'This enacted law expands premium tax credits for health insurance purchased through ACA marketplaces. Key provisions: (1) Eliminates the income cap (previously 400% FPL) for premium tax credit eligibility, (2) Increases premium tax credits for families earning 150-400% of Federal Poverty Level, (3) Caps premium costs at 8.5% of income for families above 400% FPL, (4) Provides temporary subsidies for COBRA continuation coverage, (5) Increases subsidies for benchmark silver plans. The law is estimated to reduce premiums by an average of $50-200 per month for middle-income families.',
+    summary: 'This law expands premium tax credits for health insurance purchased through ACA marketplaces. It eliminates the income cap for premium tax credit eligibility, increases credits for families earning 150-400% FPL, caps premium costs at 8.5% of income, provides COBRA subsidies, and enhances silver plan subsidies. Estimated to reduce premiums by $50-200/month for middle-income families.',
     keyProvisions: [
       'Premium cap: Health insurance premiums limited to 8.5% of household income',
       'Expanded eligibility: Removes 400% FPL income cap for premium tax credits',

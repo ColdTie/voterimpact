@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { analyzePersonalImpact } from '../services/claudeService';
 import PoliticianCard from './PoliticianCard';
 import SocialShare from './SocialShare';
+import BillTracker from './BillTracker';
+import RepresentativeContact from './RepresentativeContact';
 
 const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelected = false, onSelectionChange }) => {
   const { userProfile } = useAuth();
@@ -10,6 +12,8 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSocialShare, setShowSocialShare] = useState(false);
+  const [showBillTracker, setShowBillTracker] = useState(false);
+  const [showRepContact, setShowRepContact] = useState(false);
 
   const {
     title,
@@ -326,14 +330,26 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
             {personalImpact}
           </p>
           
-          {/* Sharing Options */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-            <div className="flex space-x-2">
+          {/* Action Buttons */}
+          <div className="pt-3 border-t border-gray-200">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+              <button
+                onClick={() => setShowBillTracker(true)}
+                className="flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700"
+              >
+                🔔 Track Bill
+              </button>
+              <button
+                onClick={() => setShowRepContact(true)}
+                className="flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700"
+              >
+                📞 Contact Rep
+              </button>
               <button
                 onClick={() => setShowSocialShare(true)}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                className="flex items-center justify-center px-3 py-2 bg-purple-600 text-white rounded text-xs font-medium hover:bg-purple-700"
               >
-                🔗 Share Analysis
+                🔗 Share
               </button>
               <button
                 onClick={() => {
@@ -363,21 +379,27 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
                   printWindow.document.close();
                   printWindow.print();
                 }}
-                className="text-xs text-gray-600 hover:text-gray-800 font-medium"
+                className="flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded text-xs font-medium hover:bg-gray-700"
               >
-                Print/Export
+                📄 Export
               </button>
             </div>
-            <div className="text-xs text-gray-500">
-              Impact: <span className={financialEffect >= 0 ? 'text-green-600' : 'text-red-600'}>
-                {isBenefit ? '👍 Benefit' : '👎 Cost'}
+            
+            <div className="flex justify-between items-center text-xs text-gray-500">
+              <span>
+                Impact: <span className={financialEffect >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  {isBenefit ? '👍 Benefit' : '👎 Cost'}
+                </span>
               </span>
+              {legislation.lastActionDate && (
+                <span>Last updated: {new Date(legislation.lastActionDate).toLocaleDateString()}</span>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Enhanced Social Share Modal */}
+      {/* Modals */}
       {showSocialShare && (
         <SocialShare
           legislation={legislation}
@@ -390,6 +412,20 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
           }}
           userProfile={userProfile}
           onClose={() => setShowSocialShare(false)}
+        />
+      )}
+
+      {showBillTracker && (
+        <BillTracker
+          bill={legislation}
+          onClose={() => setShowBillTracker(false)}
+        />
+      )}
+
+      {showRepContact && (
+        <RepresentativeContact
+          userLocation={userProfile?.location}
+          onClose={() => setShowRepContact(false)}
         />
       )}
     </div>
