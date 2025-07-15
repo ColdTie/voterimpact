@@ -182,6 +182,7 @@ const UserProfileForm = ({ onComplete }) => {
         future_goals: formData.futureGoals
       };
 
+      console.log('Profile data being sent:', profileData);
       const { error } = await updateProfile(profileData);
       
       if (error) throw error;
