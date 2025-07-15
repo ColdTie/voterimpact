@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import CongressService from '../services/CongressService';
 import OpenStatesService from '../services/OpenStatesService';
 import LocalGovernmentService from '../services/LocalGovernmentService';
+import UniversalDataSources from '../services/UniversalDataSources';
 import { analyzePersonalImpact } from '../services/claudeService';
 import locationParser from '../utils/locationParser';
 import RelevanceScoring from '../services/RelevanceScoring';
@@ -19,6 +20,80 @@ export const useLegislation = (userProfile, filters = {}) => {
   const { category, scope, searchQuery } = filters;
   const pageSize = 20;
 
+  // Legacy API sources fallback
+  const loadLegacyAPISources = async (scope, searchQuery, currentPage, pageSize, parsedLocation, userProfile) => {
+    let bills = [];
+    
+    if (scope === 'Federal' || scope === 'All Levels') {
+      // Fetch federal bills from Congress.gov
+      let federalBills = [];
+      if (searchQuery) {
+        federalBills = await CongressService.searchBills(searchQuery, {
+          limit: pageSize,
+          offset: currentPage * pageSize
+        });
+      } else {
+        federalBills = await CongressService.getRecentBills({
+          limit: pageSize,
+          offset: currentPage * pageSize
+        });
+      }
+      bills = [...bills, ...federalBills];
+    }
+    
+    if ((scope === 'State' || scope === 'All Levels') && parsedLocation?.stateCode) {
+      // Fetch state bills from OpenStates
+      try {
+        let stateBills = [];
+        if (searchQuery) {
+          stateBills = await OpenStatesService.searchStateBills(
+            parsedLocation.stateCode, 
+            searchQuery, 
+            { limit: Math.floor(pageSize / 3), page: currentPage + 1 }
+          );
+        } else {
+          stateBills = await OpenStatesService.getStateBills(
+            parsedLocation.stateCode, 
+            { limit: Math.floor(pageSize / 3), page: currentPage + 1 }
+          );
+        }
+        bills = [...bills, ...stateBills];
+      } catch (error) {
+        console.error('Error fetching state bills:', error);
+      }
+    }
+    
+    if ((scope === 'Local' || scope === 'All Levels') && userProfile?.location) {
+      // Fetch local ballot measures and legislation with timeout
+      try {
+        const localMeasures = await Promise.race([
+          LocalGovernmentService.getLocalMeasuresByLocation(userProfile.location),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Local content timeout after 8 seconds')), 8000)
+          )
+        ]);
+        
+        if (localMeasures && Array.isArray(localMeasures)) {
+          bills = [...bills, ...localMeasures];
+          console.log(`Loaded ${localMeasures.length} local items for ${userProfile.location}`);
+        }
+      } catch (error) {
+        console.error('Error fetching local measures:', error.message);
+        
+        // Fallback to simple local content generation
+        try {
+          const fallbackContent = generateLocalContentTemplates(userProfile.location);
+          bills = [...bills, ...fallbackContent];
+          console.log(`Using fallback local content (${fallbackContent.length} items)`);
+        } catch (fallbackError) {
+          console.error('Error generating fallback content:', fallbackError);
+        }
+      }
+    }
+    
+    return bills;
+  };
+
   // Load legislation data
   const loadLegislation = useCallback(async (reset = false) => {
     try {
@@ -26,79 +101,34 @@ export const useLegislation = (userProfile, filters = {}) => {
       setError(null);
 
       const currentPage = reset ? 0 : page;
+      let bills = [];
       
       // Parse user location for state/local legislation
       const parsedLocation = userProfile?.location ? 
         locationParser.parseLocation(userProfile.location) : null;
       
-      // Fetch different types of legislation based on scope filter
-      let bills = [];
-      
-      if (scope === 'Federal' || scope === 'All Levels') {
-        // Fetch federal bills from Congress.gov
-        let federalBills = [];
-        if (searchQuery) {
-          federalBills = await CongressService.searchBills(searchQuery, {
-            limit: pageSize,
-            offset: currentPage * pageSize
-          });
+      // Try universal data sources first (real data)
+      try {
+        const universalContent = await Promise.race([
+          UniversalDataSources.getAllContent(userProfile?.location, userProfile),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Universal data timeout')), 10000)
+          )
+        ]);
+        
+        if (universalContent && universalContent.length > 0) {
+          console.log(`✅ Loaded ${universalContent.length} real items from universal sources`);
+          bills = [...bills, ...universalContent];
         } else {
-          federalBills = await CongressService.getRecentBills({
-            limit: pageSize,
-            offset: currentPage * pageSize
-          });
+          console.log('⚠️ No real data available, using legacy sources...');
+          // Fall back to legacy API system
+          bills = await loadLegacyAPISources(scope, searchQuery, currentPage, pageSize, parsedLocation, userProfile);
         }
-        bills = [...bills, ...federalBills];
-      }
-      
-      if ((scope === 'State' || scope === 'All Levels') && parsedLocation?.stateCode) {
-        // Fetch state bills from OpenStates
-        try {
-          let stateBills = [];
-          if (searchQuery) {
-            stateBills = await OpenStatesService.searchStateBills(
-              parsedLocation.stateCode, 
-              searchQuery, 
-              { limit: Math.floor(pageSize / 3), page: currentPage + 1 }
-            );
-          } else {
-            stateBills = await OpenStatesService.getStateBills(
-              parsedLocation.stateCode, 
-              { limit: Math.floor(pageSize / 3), page: currentPage + 1 }
-            );
-          }
-          bills = [...bills, ...stateBills];
-        } catch (error) {
-          console.error('Error fetching state bills:', error);
-        }
-      }
-      
-      if ((scope === 'Local' || scope === 'All Levels') && userProfile?.location) {
-        // Fetch local ballot measures and legislation with timeout
-        try {
-          const localMeasures = await Promise.race([
-            LocalGovernmentService.getLocalMeasuresByLocation(userProfile.location),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Local content timeout after 8 seconds')), 8000)
-            )
-          ]);
-          
-          if (localMeasures && Array.isArray(localMeasures)) {
-            bills = [...bills, ...localMeasures];
-            console.log(`Loaded ${localMeasures.length} local items for ${userProfile.location}`);
-          }
-        } catch (error) {
-          console.error('Error fetching local measures:', error.message);
-          
-          // Fallback to simple local content generation
-          try {
-            const fallbackContent = generateLocalContentTemplates(userProfile.location);
-            bills = [...bills, ...fallbackContent];
-            console.log(`Using fallback local content (${fallbackContent.length} items)`);
-          } catch (fallbackError) {
-            console.error('Error generating fallback content:', fallbackError);
-          }
-        }
+      } catch (error) {
+        console.error('Universal data sources failed:', error.message);
+        console.log('⚠️ Falling back to legacy API sources...');
+        // Fall back to legacy API system
+        bills = await loadLegacyAPISources(scope, searchQuery, currentPage, pageSize, parsedLocation, userProfile);
       }
       
       // If no real data and it's the first page, use nationalized sample data
