@@ -42,6 +42,30 @@ Company: ${userProfile.company || 'Not specified'}
 Veteran Status: ${userProfile.is_veteran ? 'Yes' : 'No'}
 Political Interests: ${userProfile.political_interests?.join(', ') || 'None specified'}
 
+WORK & ECONOMICS:
+Employment Status: ${userProfile.employment_status || 'Not specified'}
+Industry: ${userProfile.industry || 'Not specified'}
+
+FAMILY & HOUSING:
+Household Size: ${userProfile.household_size || 'Not specified'}
+Housing Status: ${userProfile.housing_status || 'Not specified'}
+Dependents: ${userProfile.dependents || 'Not specified'}
+
+LIFESTYLE:
+Transportation: ${userProfile.transportation || 'Not specified'}
+Health Coverage: ${userProfile.health_coverage || 'Not specified'}
+Education Level: ${userProfile.education || 'Not specified'}
+
+CIVIC ENGAGEMENT:
+Voting Frequency: ${userProfile.voting_frequency || 'Not specified'}
+
+PERSONAL PRIORITIES:
+Top Issues: ${userProfile.top_issues || 'Not specified'}
+Daily Policy Impacts: ${userProfile.daily_policies || 'Not specified'}
+Community Issues: ${userProfile.community_issues || 'Not specified'}
+Financial Concerns: ${userProfile.financial_concerns || 'Not specified'}
+Future Goals: ${userProfile.future_goals || 'Not specified'}
+
 ANALYSIS REQUIREMENTS:
 You must be COMPLETELY HONEST about what you can and cannot determine from the limited information provided.
 

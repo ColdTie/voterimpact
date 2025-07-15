@@ -11,6 +11,31 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   monthly_income DECIMAL(10,2) CHECK (monthly_income >= 0),
   is_veteran BOOLEAN DEFAULT FALSE,
   political_interests TEXT[],
+  
+  -- Work & Economics
+  employment_status VARCHAR(50),
+  industry VARCHAR(50),
+  
+  -- Family & Housing
+  household_size VARCHAR(10),
+  housing_status VARCHAR(50),
+  dependents VARCHAR(50),
+  
+  -- Lifestyle
+  transportation VARCHAR(50),
+  health_coverage VARCHAR(50),
+  education VARCHAR(50),
+  
+  -- Civic Engagement
+  voting_frequency VARCHAR(50),
+  
+  -- Your Priorities (with character limits enforced in app)
+  top_issues TEXT,
+  daily_policies TEXT,
+  community_issues TEXT,
+  financial_concerns TEXT,
+  future_goals TEXT,
+  
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
