@@ -22,8 +22,8 @@ class LocalGovernmentService {
     return cachedItem && Date.now() - cachedItem.timestamp < this.cacheExpiry;
   }
 
-  // Make API request with caching
-  async fetchFromAPI(url, headers = {}) {
+  // Make API request with caching and timeout
+  async fetchFromAPI(url, headers = {}, timeout = 5000) {
     const cacheKey = this.getCacheKey(url);
     const cached = this.cache.get(cacheKey);
 
@@ -32,7 +32,12 @@ class LocalGovernmentService {
     }
 
     try {
-      const response = await fetch(url, { headers });
+      const response = await Promise.race([
+        fetch(url, { headers }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('API request timeout')), timeout)
+        )
+      ]);
       
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);

@@ -7,7 +7,7 @@ import locationParser from '../utils/locationParser';
 import RelevanceScoring from '../services/RelevanceScoring';
 
 // Fallback to sample data if API fails
-import { getNationalizedContent } from '../data/nationalSampleContent';
+import { getNationalizedContent, generateLocalContentTemplates } from '../data/nationalSampleContent';
 
 export const useLegislation = (userProfile, filters = {}) => {
   const [legislation, setLegislation] = useState([]);
@@ -74,12 +74,30 @@ export const useLegislation = (userProfile, filters = {}) => {
       }
       
       if ((scope === 'Local' || scope === 'All Levels') && userProfile?.location) {
-        // Fetch local ballot measures and legislation
+        // Fetch local ballot measures and legislation with timeout
         try {
-          const localMeasures = await LocalGovernmentService.getLocalMeasuresByLocation(userProfile.location);
-          bills = [...bills, ...localMeasures];
+          const localMeasures = await Promise.race([
+            LocalGovernmentService.getLocalMeasuresByLocation(userProfile.location),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Local content timeout after 8 seconds')), 8000)
+            )
+          ]);
+          
+          if (localMeasures && Array.isArray(localMeasures)) {
+            bills = [...bills, ...localMeasures];
+            console.log(`Loaded ${localMeasures.length} local items for ${userProfile.location}`);
+          }
         } catch (error) {
-          console.error('Error fetching local measures:', error);
+          console.error('Error fetching local measures:', error.message);
+          
+          // Fallback to simple local content generation
+          try {
+            const fallbackContent = generateLocalContentTemplates(userProfile.location);
+            bills = [...bills, ...fallbackContent];
+            console.log(`Using fallback local content (${fallbackContent.length} items)`);
+          } catch (fallbackError) {
+            console.error('Error generating fallback content:', fallbackError);
+          }
         }
       }
       
@@ -97,7 +115,13 @@ export const useLegislation = (userProfile, filters = {}) => {
       
       // Additional scope filtering (in case we have mixed data)
       if (scope && scope !== 'All Levels') {
-        filteredBills = filteredBills.filter(bill => bill.scope === scope);
+        filteredBills = filteredBills.filter(bill => {
+          if (scope === 'Local') {
+            // Include all local-level content: Local, City, County, Special District
+            return ['Local', 'City', 'County', 'Special District'].includes(bill.scope);
+          }
+          return bill.scope === scope;
+        });
       }
       
       // Location-based filtering for relevant local bills
@@ -122,14 +146,35 @@ export const useLegislation = (userProfile, filters = {}) => {
         });
       }
 
-      // Add personal impact analysis for each bill (if user profile exists)
+      // Apply relevance scoring and sort by relevance
       if (userProfile) {
-        const billsWithImpact = await Promise.all(
-          filteredBills.map(async (bill) => {
+        filteredBills = RelevanceScoring.sortByRelevance(filteredBills, userProfile);
+      }
+
+      // Display content immediately without waiting for AI analysis
+      if (reset) {
+        setLegislation(filteredBills);
+        setPage(1);
+      } else {
+        setLegislation(prev => [...prev, ...filteredBills]);
+        setPage(prev => prev + 1);
+      }
+
+      // Add personal impact analysis asynchronously (non-blocking)
+      if (userProfile && filteredBills.length > 0) {
+        // Run AI analysis in background without blocking UI
+        Promise.allSettled(
+          filteredBills.map(async (bill, index) => {
             try {
-              const result = await analyzePersonalImpact(bill, userProfile);
+              const result = await Promise.race([
+                analyzePersonalImpact(bill, userProfile),
+                new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error('AI analysis timeout')), 10000)
+                )
+              ]);
+              
               if (result.success) {
-                return {
+                const enhancedBill = {
                   ...bill,
                   personalImpact: result.data.personalImpact,
                   financialEffect: result.data.financialEffect,
@@ -137,27 +182,20 @@ export const useLegislation = (userProfile, filters = {}) => {
                   confidence: result.data.confidence,
                   isBenefit: result.data.isBenefit
                 };
+                
+                // Update individual bill without re-rendering entire list
+                setLegislation(prev => 
+                  prev.map(item => item.id === bill.id ? enhancedBill : item)
+                );
               }
             } catch (err) {
-              console.error('Error analyzing bill impact:', err);
+              console.error('Error analyzing bill impact for', bill.title, ':', err.message);
+              // Continue with original bill data
             }
-            return bill;
           })
-        );
-        filteredBills = billsWithImpact;
-      }
-
-      // Apply relevance scoring and sort by relevance
-      if (userProfile) {
-        filteredBills = RelevanceScoring.sortByRelevance(filteredBills, userProfile);
-      }
-
-      if (reset) {
-        setLegislation(filteredBills);
-        setPage(1);
-      } else {
-        setLegislation(prev => [...prev, ...filteredBills]);
-        setPage(prev => prev + 1);
+        ).catch(err => {
+          console.error('Error in background AI analysis:', err);
+        });
       }
 
       setHasMore(filteredBills.length === pageSize);
