@@ -591,32 +591,44 @@ function MainApp() {
     
     // Political interests matching
     if (profile.political_interests && item.relevantInterests) {
-      const userInterests = profile.political_interests.toLowerCase();
-      const matchingInterests = item.relevantInterests.filter(interest =>
-        userInterests.includes(interest.toLowerCase()) ||
-        interest.toLowerCase().includes(userInterests)
-      );
-      score += matchingInterests.length * 2;
+      const userInterests = typeof profile.political_interests === 'string' 
+        ? profile.political_interests.toLowerCase() 
+        : '';
+      if (userInterests) {
+        const matchingInterests = item.relevantInterests.filter(interest =>
+          userInterests.includes(interest.toLowerCase()) ||
+          interest.toLowerCase().includes(userInterests)
+        );
+        score += matchingInterests.length * 2;
+      }
     }
     
     // Priority matching from user's stated concerns
     if (profile.top_issues && item.priorityMatch) {
-      const userIssues = profile.top_issues.toLowerCase();
-      const matchingPriorities = item.priorityMatch.filter(priority =>
-        userIssues.includes(priority.toLowerCase()) ||
-        priority.toLowerCase().includes(userIssues)
-      );
-      score += matchingPriorities.length * 3;
+      const userIssues = typeof profile.top_issues === 'string' 
+        ? profile.top_issues.toLowerCase() 
+        : '';
+      if (userIssues) {
+        const matchingPriorities = item.priorityMatch.filter(priority =>
+          userIssues.includes(priority.toLowerCase()) ||
+          priority.toLowerCase().includes(userIssues)
+        );
+        score += matchingPriorities.length * 3;
+      }
     }
     
     // Financial concerns matching
     if (profile.financial_concerns && item.priorityMatch) {
-      const userConcerns = profile.financial_concerns.toLowerCase();
-      const matchingConcerns = item.priorityMatch.filter(priority =>
-        userConcerns.includes(priority.toLowerCase()) ||
-        priority.toLowerCase().includes(userConcerns)
-      );
-      score += matchingConcerns.length * 2;
+      const userConcerns = typeof profile.financial_concerns === 'string' 
+        ? profile.financial_concerns.toLowerCase() 
+        : '';
+      if (userConcerns) {
+        const matchingConcerns = item.priorityMatch.filter(priority =>
+          userConcerns.includes(priority.toLowerCase()) ||
+          priority.toLowerCase().includes(userConcerns)
+        );
+        score += matchingConcerns.length * 2;
+      }
     }
     
     return Math.max(score, 0.1); // Minimum score to ensure items aren't completely filtered out
@@ -666,16 +678,27 @@ function MainApp() {
   }
 
   if (!user) {
+    console.log('No authenticated user - showing login');
     return <AuthWrapper />;
   }
 
   if (!userProfile || showProfileForm) {
+    console.log('User authenticated but no profile or showing profile form:', { 
+      hasUserProfile: !!userProfile, 
+      showProfileForm,
+      userEmail: user?.email 
+    });
     return (
       <div className="min-h-screen bg-gray-50 py-12">
-        <UserProfileForm onComplete={() => setShowProfileForm(false)} />
+        <UserProfileForm onComplete={() => {
+          console.log('Profile form completed');
+          setShowProfileForm(false);
+        }} />
       </div>
     );
   }
+
+  console.log('Rendering main app for user:', user?.email);
 
   // Convert Supabase profile format to component format
   const displayUser = {

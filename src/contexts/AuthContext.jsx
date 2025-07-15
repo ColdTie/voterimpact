@@ -59,10 +59,17 @@ export const AuthProvider = ({ children }) => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user profile:', error);
+        setUserProfile(null);
         return;
       }
 
-      setUserProfile(data);
+      if (data) {
+        console.log('User profile loaded successfully:', data);
+        setUserProfile(data);
+      } else {
+        console.log('No user profile found - new user needs to create profile');
+        setUserProfile(null);
+      }
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
