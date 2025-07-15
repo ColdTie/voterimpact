@@ -1,6 +1,8 @@
 // Service for fetching local government legislation and ballot measures
 // Uses multiple APIs: Google Civic Information API, Ballotpedia, etc.
 
+import UniversalCityDataService from './UniversalCityDataService';
+
 const GOOGLE_CIVIC_API_KEY = process.env.REACT_APP_GOOGLE_CIVIC_API_KEY;
 // const BALLOTPEDIA_API_KEY = process.env.REACT_APP_BALLOTPEDIA_API_KEY; // For future use
 
@@ -94,83 +96,99 @@ class LocalGovernmentService {
     return elections;
   }
 
-  // Get sample local ballot measures (fallback when APIs aren't available)
-  getSampleLocalMeasures(location) {
+  // Get generic local ballot measures (fallback when APIs aren't available)
+  getGenericLocalMeasures(location) {
     if (!location) return [];
 
-    const locationLower = location.toLowerCase();
+    const locationInfo = this.parseLocationInfo(location);
     const measures = [];
 
-    // California measures
-    if (locationLower.includes('california') || locationLower.includes('ca')) {
-      measures.push({
-        id: 'ca-prop-local-1',
-        title: 'Local Transportation Bond Measure',
-        type: 'ballot_measure',
-        scope: 'Local',
-        category: 'Transportation',
-        location: location,
-        description: 'Approves $500 million bond for local transportation improvements including bike lanes, road repairs, and public transit expansion.',
-        status: 'On Ballot',
-        electionDate: '2025-11-04',
-        votingOptions: ['Yes', 'No'],
-        summary: 'This measure would authorize the issuance of $500 million in general obligation bonds to fund transportation infrastructure improvements.',
-        relevantDemographics: ['public_transit_users', 'commuters', 'cyclists'],
-        relevantInterests: ['public_transportation', 'infrastructure', 'environmental_benefits'],
-        householdRelevance: ['any_household_size'],
-        incomeRelevance: ['any_income'],
-        locationTags: [this.extractStateCode(location)?.toLowerCase()],
-        priorityMatch: ['transportation_access', 'infrastructure', 'environmental_protection']
-      });
-    }
+    // Generic infrastructure measure for any location
+    measures.push({
+      id: `local-infrastructure-${Date.now()}`,
+      title: `${locationInfo.displayName} Infrastructure Bond Measure`,
+      type: 'ballot_measure',
+      scope: 'Local',
+      category: 'Infrastructure',
+      location: location,
+      description: `Approves bond funding for local infrastructure improvements including roads, water systems, and public facilities in ${locationInfo.displayName}.`,
+      status: 'On Ballot',
+      electionDate: '2025-11-04',
+      votingOptions: ['Yes', 'No'],
+      summary: `This measure would authorize the issuance of bonds to fund essential infrastructure improvements in ${locationInfo.displayName}.`,
+      relevantDemographics: ['homeowners', 'commuters', 'all_residents'],
+      relevantInterests: ['infrastructure', 'public_safety', 'property_values'],
+      householdRelevance: ['any_household_size'],
+      incomeRelevance: ['any_income'],
+      locationTags: [locationInfo.stateCode?.toLowerCase() || 'local'],
+      priorityMatch: ['infrastructure', 'community_development']
+    });
 
-    // Nevada measures
-    if (locationLower.includes('nevada') || locationLower.includes('nv') || locationLower.includes('las vegas')) {
-      measures.push({
-        id: 'nv-local-education-1',
-        title: 'School District Funding Initiative',
-        type: 'ballot_measure',
-        scope: 'Local',
-        category: 'Education',
-        location: location,
-        description: 'Increases local property taxes to fund teacher salaries, school modernization, and educational technology programs.',
-        status: 'On Ballot',
-        electionDate: '2025-11-04',
-        votingOptions: ['Yes', 'No'],
-        summary: 'This initiative would increase property taxes by $0.15 per $1,000 of assessed value to generate $50 million annually for schools.',
-        relevantDemographics: ['families_with_children', 'homeowners', 'teachers'],
-        relevantInterests: ['education_policy', 'tax_policy'],
-        householdRelevance: ['families_with_children'],
-        incomeRelevance: ['any_income'],
-        locationTags: ['nv'],
-        priorityMatch: ['education_quality', 'education_funding']
-      });
-    }
+    // Generic education measure
+    measures.push({
+      id: `local-education-${Date.now()}`,
+      title: `${locationInfo.displayName} School Improvement Initiative`,
+      type: 'ballot_measure',
+      scope: 'Local',
+      category: 'Education',
+      location: location,
+      description: `Local funding measure to improve schools, update technology, and enhance educational programs in ${locationInfo.displayName}.`,
+      status: 'On Ballot',
+      electionDate: '2025-11-04',
+      votingOptions: ['Yes', 'No'],
+      summary: `This initiative would provide additional funding for local schools to improve facilities and educational outcomes.`,
+      relevantDemographics: ['families_with_children', 'teachers', 'all_residents'],
+      relevantInterests: ['education_policy', 'community_development'],
+      householdRelevance: ['families_with_children'],
+      incomeRelevance: ['any_income'],
+      locationTags: [locationInfo.stateCode?.toLowerCase() || 'local'],
+      priorityMatch: ['education_quality', 'education_funding']
+    });
 
-    // General urban measures
-    if (locationLower.includes('city') || locationLower.includes('urban')) {
-      measures.push({
-        id: 'local-housing-1',
-        title: 'Affordable Housing Development Measure',
-        type: 'ballot_measure',
-        scope: 'Local',
-        category: 'Housing',
-        location: location,
-        description: 'Authorizes the city to issue bonds for affordable housing development and provides incentives for developers.',
-        status: 'On Ballot',
-        electionDate: '2025-11-04',
-        votingOptions: ['Yes', 'No'],
-        summary: 'This measure would authorize $100 million in bonds to build 500 affordable housing units and provide tax incentives for affordable housing developers.',
-        relevantDemographics: ['renters', 'low_income', 'young_adults'],
-        relevantInterests: ['housing_affordability', 'economic_development'],
-        householdRelevance: ['any_household_size'],
-        incomeRelevance: ['low_to_moderate_income'],
-        locationTags: ['local'],
-        priorityMatch: ['affordable_housing', 'cost_of_living']
-      });
-    }
+    // Generic public safety measure
+    measures.push({
+      id: `local-safety-${Date.now()}`,
+      title: `${locationInfo.displayName} Public Safety Enhancement`,
+      type: 'ballot_measure',
+      scope: 'Local',
+      category: 'Public Safety',
+      location: location,
+      description: `Funding measure to enhance police, fire, and emergency services in ${locationInfo.displayName}.`,
+      status: 'On Ballot',
+      electionDate: '2025-11-04',
+      votingOptions: ['Yes', 'No'],
+      summary: `This measure would provide additional resources for public safety services and emergency response capabilities.`,
+      relevantDemographics: ['all_residents'],
+      relevantInterests: ['public_safety', 'emergency_services'],
+      householdRelevance: ['any_household_size'],
+      incomeRelevance: ['any_income'],
+      locationTags: [locationInfo.stateCode?.toLowerCase() || 'local'],
+      priorityMatch: ['public_safety', 'emergency_services']
+    });
 
     return measures;
+  }
+
+  // Parse location info for display names
+  parseLocationInfo(location) {
+    const parts = location.split(',').map(part => part.trim());
+    let displayName = 'Your Area';
+    let stateCode = null;
+    
+    if (parts.length >= 2) {
+      displayName = parts[0]; // Use city name
+      const statePart = parts[parts.length - 1];
+      
+      if (statePart.length === 2) {
+        stateCode = statePart.toUpperCase();
+      } else {
+        stateCode = this.extractStateCode(location);
+      }
+    } else if (parts.length === 1) {
+      displayName = parts[0];
+    }
+    
+    return { displayName, stateCode };
   }
 
   // Transform Google Civic API voter info data
@@ -349,7 +367,15 @@ class LocalGovernmentService {
   async getLocalMeasuresByLocation(location) {
     const measures = [];
     
-    // Try voter info first
+    // Try universal city data service first
+    try {
+      const cityContent = await UniversalCityDataService.getContentByLocation(location);
+      measures.push(...cityContent);
+    } catch (error) {
+      console.error('Error fetching city content:', error);
+    }
+    
+    // Try voter info second
     try {
       const voterInfo = await this.getVoterInfo(location);
       measures.push(...voterInfo.contests);
@@ -357,9 +383,9 @@ class LocalGovernmentService {
       console.error('Error fetching voter info:', error);
     }
     
-    // Add sample measures as fallback
-    const sampleMeasures = this.getSampleLocalMeasures(location);
-    measures.push(...sampleMeasures);
+    // Add generic local measures as fallback
+    const genericMeasures = this.getGenericLocalMeasures(location);
+    measures.push(...genericMeasures);
     
     return measures;
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { analyzePersonalImpact } from '../services/claudeService';
+import { ContentTypes } from '../types/contentTypes';
 import PoliticianCard from './PoliticianCard';
 import SocialShare from './SocialShare';
 import BillTracker from './BillTracker';
@@ -61,14 +62,54 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
     }
   };
 
+  // Get icon and display info based on content type
+  const getContentTypeInfo = (type) => {
+    switch (type) {
+      case ContentTypes.FEDERAL_BILL:
+      case ContentTypes.STATE_BILL:
+        return { icon: '📜', label: 'Bill' };
+      case ContentTypes.LOCAL_ORDINANCE:
+        return { icon: '📋', label: 'Ordinance' };
+      case ContentTypes.BALLOT_MEASURE:
+        return { icon: '🗳️', label: 'Ballot Measure' };
+      case ContentTypes.CITY_PROJECT:
+        return { icon: '🏗️', label: 'City Project' };
+      case ContentTypes.BUDGET_ITEM:
+        return { icon: '💰', label: 'Budget Item' };
+      case ContentTypes.TAX_MEASURE:
+        return { icon: '💸', label: 'Tax Measure' };
+      case ContentTypes.ELECTION:
+        return { icon: '🗳️', label: 'Election' };
+      case ContentTypes.CANDIDATE:
+        return { icon: '👤', label: 'Candidate' };
+      case ContentTypes.PUBLIC_MEETING:
+        return { icon: '👥', label: 'Meeting' };
+      case ContentTypes.INFRASTRUCTURE:
+        return { icon: '🛣️', label: 'Infrastructure' };
+      case ContentTypes.SPECIAL_DISTRICT:
+        return { icon: '🏛️', label: 'Special District' };
+      default:
+        return { icon: '📄', label: 'Item' };
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'Passed':
+      case 'Approved':
+      case 'Completed':
         return 'bg-green-100 text-green-800';
       case 'In Committee':
+      case 'In Progress':
+      case 'Active':
         return 'bg-yellow-100 text-yellow-800';
       case 'Proposed':
+      case 'Introduced':
+      case 'On Ballot':
         return 'bg-blue-100 text-blue-800';
+      case 'Failed':
+      case 'Vetoed':
+        return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -138,26 +179,46 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
 
   const sponsor = findPolitician(legislation.sponsor);
   const cosponsors = legislation.cosponsors ? legislation.cosponsors.map(findPolitician).filter(Boolean) : [];
+  const contentTypeInfo = getContentTypeInfo(legislation.type);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 mx-4 mb-4 p-4">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 pr-2">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            {title}
-          </h3>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center mb-1">
+            <span className="text-lg mr-2">{contentTypeInfo.icon}</span>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {title}
+            </h3>
+          </div>
+          <div className="flex items-center space-x-2 flex-wrap">
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              {contentTypeInfo.label}
+            </span>
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
               legislation.scope === 'Federal' ? 'bg-blue-100 text-blue-800' :
               legislation.scope === 'State' ? 'bg-purple-100 text-purple-800' :
-              legislation.scope === 'Local' ? 'bg-orange-100 text-orange-800' :
+              legislation.scope === 'Local' || legislation.scope === 'City' ? 'bg-orange-100 text-orange-800' :
+              legislation.scope === 'County' ? 'bg-amber-100 text-amber-800' :
               'bg-gray-100 text-gray-800'
             }`}>
               {legislation.scope || 'Federal'}
             </span>
-            {legislation.location && (
+            {legislation.category && (
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                {legislation.category}
+              </span>
+            )}
+            {legislation.location && (typeof legislation.location === 'string' ? legislation.location : 
+              legislation.location.city || legislation.location.county || legislation.location.state) && (
               <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                {legislation.location}
+                {typeof legislation.location === 'string' ? legislation.location : 
+                 legislation.location.city || legislation.location.county || legislation.location.state}
+              </span>
+            )}
+            {legislation.relevanceScore && (
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                {Math.round(legislation.relevanceScore)}% match
               </span>
             )}
           </div>
@@ -316,6 +377,58 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
           </div>
         </div>
       </div>
+
+      {/* Content-specific details */}
+      {legislation.type === ContentTypes.BALLOT_MEASURE && legislation.votingOptions && (
+        <div className="bg-amber-50 rounded-lg p-3 mb-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Voting Options</h4>
+          <div className="flex space-x-2">
+            {legislation.votingOptions.map((option, index) => (
+              <span key={index} className="px-2 py-1 bg-white border border-amber-200 rounded text-xs">
+                {option}
+              </span>
+            ))}
+          </div>
+          {legislation.electionDate && (
+            <p className="text-xs text-amber-700 mt-2">
+              Election Date: {new Date(legislation.electionDate).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+      )}
+
+      {legislation.type === ContentTypes.CITY_PROJECT && legislation.keyProvisions && (
+        <div className="bg-blue-50 rounded-lg p-3 mb-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Project Details</h4>
+          <ul className="text-xs text-gray-600 space-y-1">
+            {legislation.keyProvisions.map((provision, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-blue-500 mr-1">•</span>
+                {provision}
+              </li>
+            ))}
+          </ul>
+          {legislation.estimatedCost && (
+            <p className="text-xs text-blue-700 mt-2 font-medium">
+              Estimated Cost: ${legislation.estimatedCost.toLocaleString()}
+            </p>
+          )}
+        </div>
+      )}
+
+      {legislation.type === ContentTypes.TAX_MEASURE && legislation.taxImpact && (
+        <div className="bg-red-50 rounded-lg p-3 mb-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Tax Impact</h4>
+          <p className="text-sm text-red-700">
+            {legislation.taxImpact > 0 ? '+' : ''}{(legislation.taxImpact * 100).toFixed(2)}% tax change
+          </p>
+          {legislation.estimatedCost && (
+            <p className="text-xs text-red-600 mt-1">
+              Annual Revenue: ${legislation.estimatedCost.toLocaleString()}
+            </p>
+          )}
+        </div>
+      )}
 
       {personalImpact && (
         <div>

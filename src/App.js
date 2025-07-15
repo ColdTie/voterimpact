@@ -75,7 +75,9 @@ const samplePoliticians = [
   }
 ];
 
-const sampleLegislation = [
+// Note: Legislation data now comes from nationalized content system
+// This prevents hardcoded location-specific content
+const sampleLegislationDeprecated = [
   // Federal Legislation
   {
     id: 1,
@@ -790,13 +792,13 @@ function MainApp() {
   try {
     safeliveLegislation = liveLegislation && liveLegislation.length > 0 
       ? liveLegislation 
-      : sampleLegislation.slice(0, 5); // Use first 5 sample bills as fallback
+      : []; // Use nationalized content system instead of hardcoded samples
 
     console.log('Using legislation data:', { 
       isLiveData: liveLegislation && liveLegislation.length > 0,
       dataCount: safeliveLegislation?.length,
-      sampleDataAvailable: !!sampleLegislation,
-      sampleDataLength: sampleLegislation?.length 
+      sampleDataAvailable: false, // Using nationalized content system
+      sampleDataLength: 0 // No hardcoded samples 
     });
   } catch (error) {
     console.error('Error preparing legislation data:', error);
@@ -912,7 +914,7 @@ function MainApp() {
 
   // Emergency fallback to prevent white screen
   try {
-    if (!Array.isArray(sampleLegislation) || sampleLegislation.length === 0) {
+    if (!Array.isArray(safeliveLegislation) || safeliveLegislation.length === 0) {
       console.error('Sample legislation is not available!');
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">

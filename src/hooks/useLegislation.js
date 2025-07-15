@@ -4,9 +4,10 @@ import OpenStatesService from '../services/OpenStatesService';
 import LocalGovernmentService from '../services/LocalGovernmentService';
 import { analyzePersonalImpact } from '../services/claudeService';
 import locationParser from '../utils/locationParser';
+import RelevanceScoring from '../services/RelevanceScoring';
 
 // Fallback to sample data if API fails
-import { sampleLegislation } from '../data/sampleLegislation';
+import { getNationalizedContent } from '../data/nationalSampleContent';
 
 export const useLegislation = (userProfile, filters = {}) => {
   const [legislation, setLegislation] = useState([]);
@@ -82,9 +83,9 @@ export const useLegislation = (userProfile, filters = {}) => {
         }
       }
       
-      // If no real data and it's the first page, use sample data
+      // If no real data and it's the first page, use nationalized sample data
       if (bills.length === 0 && currentPage === 0) {
-        bills = sampleLegislation;
+        bills = getNationalizedContent(userProfile);
       }
 
       // Filter by category if needed
@@ -146,6 +147,11 @@ export const useLegislation = (userProfile, filters = {}) => {
         filteredBills = billsWithImpact;
       }
 
+      // Apply relevance scoring and sort by relevance
+      if (userProfile) {
+        filteredBills = RelevanceScoring.sortByRelevance(filteredBills, userProfile);
+      }
+
       if (reset) {
         setLegislation(filteredBills);
         setPage(1);
@@ -160,9 +166,9 @@ export const useLegislation = (userProfile, filters = {}) => {
       console.error('Error loading legislation:', err);
       setError('Failed to load legislation. Using sample data.');
       
-      // Fallback to sample data
+      // Fallback to nationalized sample data
       if (page === 0) {
-        setLegislation(sampleLegislation);
+        setLegislation(getNationalizedContent(userProfile));
       }
       setHasMore(false);
       
