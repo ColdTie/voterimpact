@@ -159,13 +159,21 @@ const UserProfileForm = ({ onComplete }) => {
 
     try {
       const profileData = {
-        ...formData,
+        name: formData.name,
         age: parseInt(formData.age),
+        location: formData.location,
+        company: formData.company,
         monthly_income: formData.monthly_income ? parseFloat(formData.monthly_income) : null,
+        is_veteran: formData.is_veteran,
+        political_interests: formData.political_interests,
         employment_status: formData.employmentStatus,
+        industry: formData.industry,
         household_size: formData.householdSize,
         housing_status: formData.housingStatus,
+        dependents: formData.dependents,
+        transportation: formData.transportation,
         health_coverage: formData.healthcoverage,
+        education: formData.education,
         voting_frequency: formData.votingFrequency,
         top_issues: formData.topIssues,
         daily_policies: formData.dailyPolicies,
