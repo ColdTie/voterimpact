@@ -314,17 +314,17 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
       </div>
 
       {personalImpact && (
-        <div className="relative">
-          <p className="text-sm text-gray-700 leading-relaxed mb-3">
-            {personalImpact}
-          </p>
+        <div>
           {useAI && analysis && (
-            <div className="absolute top-0 right-0">
+            <div className="flex justify-end mb-2">
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 AI Analysis
               </span>
             </div>
           )}
+          <p className="text-sm text-gray-700 leading-relaxed mb-3">
+            {personalImpact}
+          </p>
           
           {/* Sharing Options */}
           <div className="flex items-center justify-between pt-2 border-t border-gray-200">
