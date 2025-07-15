@@ -88,6 +88,13 @@ const sampleLegislation = [
     confidence: 75,
     isBenefit: true,
     description: 'Extends and expands the Low-Income Housing Tax Credit program to increase affordable housing development nationwide.',
+    // Smart filtering tags
+    relevantDemographics: ['low_income', 'renters', 'first_time_buyers', 'young_adults'],
+    relevantInterests: ['housing_affordability', 'economic_development', 'tax_policy'],
+    householdRelevance: ['household_size_3+', 'housing_status_rent'],
+    incomeRelevance: ['low_to_moderate_income'],
+    locationTags: ['urban', 'suburban', 'rural'],
+    priorityMatch: ['affordable_housing', 'cost_of_living', 'financial_stability'],
     summary: 'This bill extends the Low-Income Housing Tax Credit (LIHTC) program through 2030 and increases the annual credit authority by 50%. Key provisions include: (1) Increases the 9% credit allocation to states by 50% annually, (2) Extends the placed-in-service deadline for projects allocated credits in 2020-2023, (3) Allows income averaging across units in a project, (4) Reduces the 50% test for bond-financed developments to 25%, (5) Enables tribal governments to receive direct allocations. The bill aims to create approximately 2 million additional affordable housing units over 10 years, with priority for developments serving extremely low-income families (30% AMI or below).',
     keyProvisions: [
       'Annual credit allocation increased by 50% ($2.3 billion to $3.5 billion)',
@@ -118,6 +125,13 @@ const sampleLegislation = [
     confidence: 35,
     isBenefit: null,
     description: 'Enacted legislation providing federal healthcare premium subsidies for eligible income ranges. Specific impacts depend on individual circumstances and eligibility.',
+    // Smart filtering tags
+    relevantDemographics: ['middle_income', 'self_employed', 'families', 'unemployed'],
+    relevantInterests: ['healthcare_access', 'affordable_healthcare', 'insurance_reform'],
+    householdRelevance: ['any_household_size'],
+    incomeRelevance: ['middle_income', 'moderate_income'],
+    locationTags: ['urban', 'suburban', 'rural'],
+    priorityMatch: ['healthcare_access', 'financial_stability', 'family_wellbeing'],
     summary: 'This law expands premium tax credits for health insurance purchased through ACA marketplaces. It eliminates the income cap for premium tax credit eligibility, increases credits for families earning 150-400% FPL, caps premium costs at 8.5% of income, provides COBRA subsidies, and enhances silver plan subsidies. Estimated to reduce premiums by $50-200/month for middle-income families.',
     keyProvisions: [
       'Premium cap: Health insurance premiums limited to 8.5% of household income',
@@ -211,6 +225,14 @@ const sampleLegislation = [
     confidence: 30,
     isBenefit: null,
     description: 'Enacted legislation related to military retirement benefits. Specific provisions would need to be reviewed through official military or VA channels.',
+    // Smart filtering tags
+    relevantDemographics: ['veterans', 'active_military', 'military_families'],
+    relevantInterests: ['veterans_affairs', 'retirement_planning', 'military_benefits'],
+    householdRelevance: ['military_households'],
+    incomeRelevance: ['any_income'],
+    locationTags: ['military_bases', 'urban', 'suburban', 'rural'],
+    priorityMatch: ['retirement_security', 'veterans_benefits', 'financial_planning'],
+    veteranStatus: ['required'],
     summary: 'This enacted law modernizes military retirement benefits through the Blended Retirement System (BRS). Key changes: (1) Combines traditional pension with Thrift Savings Plan (TSP) matching, (2) Reduces pension multiplier from 2.5% to 2.0% per year of service, (3) Provides automatic 1% TSP contribution plus up to 4% matching, (4) Introduces mid-career continuation pay at 12 years of service, (5) Establishes lump-sum payment option at retirement. The system applies to service members entering after January 1, 2018, with existing members having opt-in choice.',
     keyProvisions: [
       'Hybrid system: Traditional pension plus TSP matching contributions',
@@ -245,6 +267,14 @@ const sampleLegislation = [
     confidence: 70,
     isBenefit: true,
     description: 'Establishes minimum wage standards and job protection rights for Nevada gaming industry employees.',
+    // Smart filtering tags
+    relevantDemographics: ['service_workers', 'tipped_workers', 'hospitality_workers'],
+    relevantInterests: ['worker_rights', 'wage_protection', 'job_security'],
+    householdRelevance: ['any_household_size'],
+    incomeRelevance: ['low_to_moderate_income'],
+    locationTags: ['nevada_only'],
+    priorityMatch: ['job_security', 'fair_wages', 'worker_protection'],
+    industryRelevance: ['hospitality', 'gaming', 'service'],
     summary: 'This Nevada state bill strengthens worker protections in the gaming industry. Key provisions: (1) Establishes $18/hour minimum wage for tipped gaming workers (dealers, cocktail servers), (2) Requires 30-day advance notice for layoffs affecting 25+ employees, (3) Mandates severance pay of 2 weeks per year of service for involuntary terminations, (4) Creates portable benefits system for workers moving between casinos, (5) Establishes worker safety committees with union representation. The bill also includes anti-retaliation protections and requires casinos to provide health insurance subsidies.',
     keyProvisions: [
       'Gaming worker minimum wage: $18/hour for tipped positions, $22/hour for non-tipped',
@@ -267,6 +297,14 @@ const sampleLegislation = [
     confidence: 85,
     isBenefit: true,
     description: 'Provides up to $5,000 in state tax credits for homeowners installing solar panels in Nevada.',
+    // Smart filtering tags
+    relevantDemographics: ['homeowners', 'middle_to_high_income', 'environmentally_conscious'],
+    relevantInterests: ['renewable_energy', 'tax_incentives', 'climate_action', 'energy_savings'],
+    householdRelevance: ['single_family_homes'],
+    incomeRelevance: ['middle_to_high_income'],
+    locationTags: ['nevada_only'],
+    priorityMatch: ['environmental_protection', 'energy_costs', 'tax_savings'],
+    housingRelevance: ['homeowners_only'],
     summary: 'This Nevada state bill creates a residential solar tax credit program. Key provisions: (1) Up to $5,000 state tax credit for solar panel installations, (2) Credit amount equals 25% of installation costs up to maximum, (3) Requires certified Nevada solar contractors for eligibility, (4) System must meet minimum 5kW capacity requirement, (5) Credit can be carried forward up to 5 years if it exceeds annual tax liability. The bill also establishes net metering protections and requires utility companies to maintain current buyback rates for solar energy production.',
     keyProvisions: [
       'Tax credit: 25% of installation costs up to $5,000 maximum per residence',
@@ -291,6 +329,15 @@ const sampleLegislation = [
     confidence: 90,
     isBenefit: true,
     description: 'Expands RTC bus service with veteran discounts and new routes to Henderson and Summerlin.',
+    // Smart filtering tags
+    relevantDemographics: ['public_transit_users', 'veterans', 'seniors', 'students', 'low_income'],
+    relevantInterests: ['public_transportation', 'accessibility', 'environmental_benefits'],
+    householdRelevance: ['any_household_size'],
+    incomeRelevance: ['low_to_moderate_income'],
+    locationTags: ['las_vegas_only', 'clark_county'],
+    priorityMatch: ['transportation_access', 'cost_savings', 'environmental_protection'],
+    veteranStatus: ['benefits_available'],
+    ageRelevance: ['seniors_65plus'],
     summary: 'This Las Vegas ordinance expands Regional Transportation Commission (RTC) bus service throughout the valley. Key provisions: (1) 12 new bus routes connecting downtown Las Vegas to Henderson, Summerlin, and North Las Vegas, (2) Reduced fares for veterans (50% discount) and seniors 65+ (free rides), (3) Extended service hours until 1 AM on weekends, (4) New express routes to McCarran Airport and UNLV campus, (5) Electric bus fleet conversion for 30% of routes by 2026. The expansion includes new bus stops and improved accessibility features.',
     keyProvisions: [
       'Route expansion: 12 new routes connecting major valley destinations',
@@ -474,17 +521,138 @@ function MainApp() {
     loadPoliticians();
   }, [loadPoliticians]);
   
-  const filteredLegislation = sampleLegislation.filter(item => {
-    const matchesCategory = activeFilter === 'All Issues' || item.category === activeFilter;
-    const matchesScope = activeScope === 'All Levels' || item.scope === activeScope;
-    const matchesLocation = !userProfile?.location || 
-      item.scope === 'Federal' || 
-      !item.location || 
-      item.location.toLowerCase().includes(userProfile.location.toLowerCase()) ||
-      userProfile.location.toLowerCase().includes(item.location.toLowerCase());
+  // Smart filtering function that calculates relevance score for each bill
+  const calculateRelevanceScore = (item, profile) => {
+    if (!profile) return 1; // Show all bills if no profile
     
-    return matchesCategory && matchesScope && matchesLocation;
-  });
+    let score = 0;
+    
+    // Location relevance (highest priority)
+    if (item.scope === 'Federal') {
+      score += 3; // Federal bills apply to everyone
+    } else if (profile.location) {
+      const userLocationLower = profile.location.toLowerCase();
+      const itemLocationLower = (item.location || '').toLowerCase();
+      
+      if (itemLocationLower.includes(userLocationLower) || 
+          userLocationLower.includes(itemLocationLower)) {
+        score += 5; // High relevance for location match
+      } else if (item.locationTags?.includes('urban') && userLocationLower.includes('city')) {
+        score += 2;
+      } else if (item.locationTags?.includes('rural') && userLocationLower.includes('rural')) {
+        score += 2;
+      }
+    }
+    
+    // Veteran status matching
+    if (profile.is_veteran && item.veteranStatus?.includes('required')) {
+      score += 4;
+    } else if (profile.is_veteran && item.veteranStatus?.includes('benefits_available')) {
+      score += 2;
+    } else if (!profile.is_veteran && item.veteranStatus?.includes('required')) {
+      score -= 2; // Reduce relevance for non-veterans
+    }
+    
+    // Income relevance
+    if (item.incomeRelevance && profile.monthly_income) {
+      const monthlyIncome = parseInt(profile.monthly_income);
+      if (monthlyIncome < 3000 && item.incomeRelevance.includes('low_to_moderate_income')) {
+        score += 3;
+      } else if (monthlyIncome >= 3000 && monthlyIncome <= 8000 && item.incomeRelevance.includes('middle_income')) {
+        score += 3;
+      } else if (monthlyIncome > 8000 && item.incomeRelevance.includes('middle_to_high_income')) {
+        score += 3;
+      }
+    }
+    
+    // Housing status relevance
+    if (profile.housing_status && item.householdRelevance) {
+      if (profile.housing_status === 'rent' && item.householdRelevance.includes('housing_status_rent')) {
+        score += 2;
+      } else if (profile.housing_status === 'own' && item.housingRelevance?.includes('homeowners_only')) {
+        score += 3;
+      }
+    }
+    
+    // Industry/employment relevance
+    if (profile.industry && item.industryRelevance) {
+      if (item.industryRelevance.includes(profile.industry.toLowerCase())) {
+        score += 4;
+      }
+    }
+    
+    // Age relevance
+    if (profile.age && item.ageRelevance) {
+      const age = parseInt(profile.age);
+      if (age >= 65 && item.ageRelevance.includes('seniors_65plus')) {
+        score += 3;
+      }
+    }
+    
+    // Political interests matching
+    if (profile.political_interests && item.relevantInterests) {
+      const userInterests = profile.political_interests.toLowerCase();
+      const matchingInterests = item.relevantInterests.filter(interest =>
+        userInterests.includes(interest.toLowerCase()) ||
+        interest.toLowerCase().includes(userInterests)
+      );
+      score += matchingInterests.length * 2;
+    }
+    
+    // Priority matching from user's stated concerns
+    if (profile.top_issues && item.priorityMatch) {
+      const userIssues = profile.top_issues.toLowerCase();
+      const matchingPriorities = item.priorityMatch.filter(priority =>
+        userIssues.includes(priority.toLowerCase()) ||
+        priority.toLowerCase().includes(userIssues)
+      );
+      score += matchingPriorities.length * 3;
+    }
+    
+    // Financial concerns matching
+    if (profile.financial_concerns && item.priorityMatch) {
+      const userConcerns = profile.financial_concerns.toLowerCase();
+      const matchingConcerns = item.priorityMatch.filter(priority =>
+        userConcerns.includes(priority.toLowerCase()) ||
+        priority.toLowerCase().includes(userConcerns)
+      );
+      score += matchingConcerns.length * 2;
+    }
+    
+    return Math.max(score, 0.1); // Minimum score to ensure items aren't completely filtered out
+  };
+
+  const filteredAndSortedLegislation = sampleLegislation
+    .filter(item => {
+      // Basic filter checks (category and scope)
+      const matchesCategory = activeFilter === 'All Issues' || item.category === activeFilter;
+      const matchesScope = activeScope === 'All Levels' || item.scope === activeScope;
+      
+      // Location filter - more permissive for personalized experience
+      const matchesLocation = !userProfile?.location || 
+        item.scope === 'Federal' || 
+        !item.location || 
+        item.location.toLowerCase().includes(userProfile.location.toLowerCase()) ||
+        userProfile.location.toLowerCase().includes(item.location.toLowerCase());
+      
+      return matchesCategory && matchesScope && matchesLocation;
+    })
+    .map(item => ({
+      ...item,
+      relevanceScore: calculateRelevanceScore(item, userProfile)
+    }))
+    .sort((a, b) => {
+      // Sort by relevance score (highest first), then by financial effect if benefits
+      if (b.relevanceScore !== a.relevanceScore) {
+        return b.relevanceScore - a.relevanceScore;
+      }
+      if (a.isBenefit && b.isBenefit) {
+        return (b.financialEffect || 0) - (a.financialEffect || 0);
+      }
+      return 0;
+    });
+
+  const filteredLegislation = filteredAndSortedLegislation;
 
   if (loading) {
     return (
