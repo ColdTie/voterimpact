@@ -786,48 +786,85 @@ function MainApp() {
   };
 
   // Ensure we always have some data to work with
-  const safeliveLegislation = liveLegislation && liveLegislation.length > 0 
-    ? liveLegislation 
-    : sampleLegislation.slice(0, 5); // Use first 5 sample bills as fallback
+  let safeliveLegislation;
+  try {
+    safeliveLegislation = liveLegislation && liveLegislation.length > 0 
+      ? liveLegislation 
+      : sampleLegislation.slice(0, 5); // Use first 5 sample bills as fallback
 
-  console.log('Using legislation data:', { 
-    isLiveData: liveLegislation && liveLegislation.length > 0,
-    dataCount: safeliveLegislation?.length 
-  });
+    console.log('Using legislation data:', { 
+      isLiveData: liveLegislation && liveLegislation.length > 0,
+      dataCount: safeliveLegislation?.length,
+      sampleDataAvailable: !!sampleLegislation,
+      sampleDataLength: sampleLegislation?.length 
+    });
+  } catch (error) {
+    console.error('Error preparing legislation data:', error);
+    safeliveLegislation = []; // Empty fallback to prevent crashes
+  }
 
   // Apply smart filtering to live legislation data (with safety checks)
-  const filteredAndSortedLegislation = safeliveLegislation
-    .map(item => {
-      // Add smart filtering tags if they don't exist (for live data)
-      const enhancedItem = {
-        ...item,
-        relevantDemographics: item.relevantDemographics || [],
-        relevantInterests: item.relevantInterests || [],
-        householdRelevance: item.householdRelevance || [],
-        incomeRelevance: item.incomeRelevance || [],
-        locationTags: item.locationTags || [],
-        priorityMatch: item.priorityMatch || []
-      };
-      
-      const score = calculateRelevanceScore(enhancedItem, userProfile);
-      const explanation = generateRelevanceExplanation(enhancedItem, userProfile, score);
-      
-      return {
-        ...enhancedItem,
-        relevanceScore: score,
-        relevanceExplanation: explanation
-      };
-    })
-    .sort((a, b) => {
-      // Sort by relevance score (highest first), then by financial effect if benefits
-      if (b.relevanceScore !== a.relevanceScore) {
-        return b.relevanceScore - a.relevanceScore;
-      }
-      if (a.isBenefit && b.isBenefit) {
-        return (b.financialEffect || 0) - (a.financialEffect || 0);
-      }
-      return 0;
-    });
+  let filteredAndSortedLegislation = [];
+  
+  try {
+    filteredAndSortedLegislation = (safeliveLegislation || [])
+      .map(item => {
+        try {
+          // Add smart filtering tags if they don't exist (for live data)
+          const enhancedItem = {
+            ...item,
+            relevantDemographics: item.relevantDemographics || [],
+            relevantInterests: item.relevantInterests || [],
+            householdRelevance: item.householdRelevance || [],
+            incomeRelevance: item.incomeRelevance || [],
+            locationTags: item.locationTags || [],
+            priorityMatch: item.priorityMatch || []
+          };
+          
+          const score = calculateRelevanceScore(enhancedItem, userProfile);
+          const explanation = generateRelevanceExplanation(enhancedItem, userProfile, score);
+          
+          return {
+            ...enhancedItem,
+            relevanceScore: score,
+            relevanceExplanation: explanation
+          };
+        } catch (itemError) {
+          console.error('Error processing individual bill:', itemError, item);
+          // Return item with minimal processing if smart filtering fails
+          return {
+            ...item,
+            relevanceScore: 1,
+            relevanceExplanation: null,
+            relevantDemographics: [],
+            relevantInterests: [],
+            householdRelevance: [],
+            incomeRelevance: [],
+            locationTags: [],
+            priorityMatch: []
+          };
+        }
+      })
+      .sort((a, b) => {
+        try {
+          // Sort by relevance score (highest first), then by financial effect if benefits
+          if (b.relevanceScore !== a.relevanceScore) {
+            return b.relevanceScore - a.relevanceScore;
+          }
+          if (a.isBenefit && b.isBenefit) {
+            return (b.financialEffect || 0) - (a.financialEffect || 0);
+          }
+          return 0;
+        } catch (sortError) {
+          console.error('Error sorting bills:', sortError);
+          return 0;
+        }
+      });
+  } catch (filterError) {
+    console.error('Error in smart filtering:', filterError);
+    // Fallback to basic data without smart filtering
+    filteredAndSortedLegislation = safeliveLegislation || [];
+  }
 
   const filteredLegislation = filteredAndSortedLegislation;
 
@@ -872,6 +909,37 @@ function MainApp() {
     legislationError,
     hasUserProfile: !!userProfile 
   });
+
+  // Emergency fallback to prevent white screen
+  try {
+    if (!Array.isArray(sampleLegislation) || sampleLegislation.length === 0) {
+      console.error('Sample legislation is not available!');
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Error</h2>
+            <p className="text-gray-600">Unable to load legislation data. Please refresh the page.</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+  } catch (emergencyError) {
+    console.error('Emergency fallback error:', emergencyError);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Application Error</h2>
+          <p className="text-gray-600">Something went wrong. Please refresh the page.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Convert Supabase profile format to component format
   const displayUser = {
