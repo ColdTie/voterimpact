@@ -785,8 +785,18 @@ function MainApp() {
     return `This bill is relevant to you because it ${reasons.slice(0, 3).join(', ')}.`;
   };
 
-  // Apply smart filtering to live legislation data
-  const filteredAndSortedLegislation = liveLegislation
+  // Ensure we always have some data to work with
+  const safeliveLegislation = liveLegislation && liveLegislation.length > 0 
+    ? liveLegislation 
+    : sampleLegislation.slice(0, 5); // Use first 5 sample bills as fallback
+
+  console.log('Using legislation data:', { 
+    isLiveData: liveLegislation && liveLegislation.length > 0,
+    dataCount: safeliveLegislation?.length 
+  });
+
+  // Apply smart filtering to live legislation data (with safety checks)
+  const filteredAndSortedLegislation = safeliveLegislation
     .map(item => {
       // Add smart filtering tags if they don't exist (for live data)
       const enhancedItem = {
@@ -856,6 +866,12 @@ function MainApp() {
   }
 
   console.log('Rendering main app for user:', user?.email);
+  console.log('Live legislation data:', { 
+    liveLegislationCount: liveLegislation?.length, 
+    legislationLoading, 
+    legislationError,
+    hasUserProfile: !!userProfile 
+  });
 
   // Convert Supabase profile format to component format
   const displayUser = {
