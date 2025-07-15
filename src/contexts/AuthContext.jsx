@@ -100,7 +100,27 @@ export const AuthProvider = ({ children }) => {
         .from('user_profiles')
         .upsert({
           id: user.id,
-          ...profileData,
+          name: profileData.name,
+          age: profileData.age,
+          location: profileData.location,
+          company: profileData.company,
+          monthly_income: profileData.monthly_income,
+          is_veteran: profileData.is_veteran,
+          political_interests: profileData.political_interests,
+          employment_status: profileData.employment_status,
+          industry: profileData.industry,
+          household_size: profileData.household_size,
+          housing_status: profileData.housing_status,
+          dependents: profileData.dependents,
+          transportation: profileData.transportation,
+          health_coverage: profileData.health_coverage,
+          education: profileData.education,
+          voting_frequency: profileData.voting_frequency,
+          top_issues: profileData.top_issues,
+          daily_policies: profileData.daily_policies,
+          community_issues: profileData.community_issues,
+          financial_concerns: profileData.financial_concerns,
+          future_goals: profileData.future_goals,
         })
         .select()
         .single();
