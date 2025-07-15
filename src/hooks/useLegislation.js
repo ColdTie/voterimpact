@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import CongressService from '../services/CongressService';
 import OpenStatesService from '../services/OpenStatesService';
+import LocalGovernmentService from '../services/LocalGovernmentService';
 import { analyzePersonalImpact } from '../services/claudeService';
 import locationParser from '../utils/locationParser';
 
@@ -57,17 +58,27 @@ export const useLegislation = (userProfile, filters = {}) => {
             stateBills = await OpenStatesService.searchStateBills(
               parsedLocation.stateCode, 
               searchQuery, 
-              { limit: Math.floor(pageSize / 2), page: currentPage + 1 }
+              { limit: Math.floor(pageSize / 3), page: currentPage + 1 }
             );
           } else {
             stateBills = await OpenStatesService.getStateBills(
               parsedLocation.stateCode, 
-              { limit: Math.floor(pageSize / 2), page: currentPage + 1 }
+              { limit: Math.floor(pageSize / 3), page: currentPage + 1 }
             );
           }
           bills = [...bills, ...stateBills];
         } catch (error) {
           console.error('Error fetching state bills:', error);
+        }
+      }
+      
+      if ((scope === 'Local' || scope === 'All Levels') && userProfile?.location) {
+        // Fetch local ballot measures and legislation
+        try {
+          const localMeasures = await LocalGovernmentService.getLocalMeasuresByLocation(userProfile.location);
+          bills = [...bills, ...localMeasures];
+        } catch (error) {
+          console.error('Error fetching local measures:', error);
         }
       }
       

@@ -9,6 +9,7 @@ import PoliticianCard from './components/PoliticianCard';
 import ComparisonModal from './components/ComparisonModal';
 import PoliticianService from './services/PoliticianService';
 import { useRepresentatives } from './hooks/useRepresentatives';
+import { useLegislation } from './hooks/useLegislation';
 
 const samplePoliticians = [
   {
@@ -448,6 +449,17 @@ function MainApp() {
   const [selectedBills, setSelectedBills] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
 
+  // Use live legislation data instead of hardcoded bills
+  const { 
+    legislation: liveLegislation, 
+    loading: legislationLoading, 
+    error: legislationError,
+    refresh: refreshLegislation 
+  } = useLegislation(userProfile, {
+    category: activeFilter !== 'All Issues' ? activeFilter : null,
+    scope: activeScope !== 'All Levels' ? activeScope : null
+  });
+
   // Use the new representatives hook for accurate location-based lookup (must be before early returns)
   const { 
     representatives: userRepresentatives, 
@@ -581,6 +593,75 @@ function MainApp() {
       }
     }
     
+    // Employment status relevance
+    if (profile.employment_status && item.relevantDemographics) {
+      if (profile.employment_status === 'unemployed' && item.relevantDemographics.includes('unemployed')) {
+        score += 3;
+      } else if (profile.employment_status === 'self_employed' && item.relevantDemographics.includes('small_business_owners')) {
+        score += 3;
+      } else if (profile.employment_status === 'employed' && item.relevantDemographics.includes('workers')) {
+        score += 2;
+      }
+    }
+    
+    // Household size relevance
+    if (profile.household_size && item.householdRelevance) {
+      const householdSize = parseInt(profile.household_size);
+      if (householdSize > 2 && item.householdRelevance.includes('families_with_children')) {
+        score += 2;
+      } else if (householdSize === 1 && item.householdRelevance.includes('single_person_households')) {
+        score += 2;
+      }
+    }
+    
+    // Dependents relevance
+    if (profile.dependents && item.relevantDemographics) {
+      const dependents = parseInt(profile.dependents || 0);
+      if (dependents > 0 && (
+        item.relevantDemographics.includes('families_with_children') ||
+        item.relevantDemographics.includes('students') ||
+        item.priorityMatch?.includes('education_quality')
+      )) {
+        score += 3;
+      }
+    }
+    
+    // Transportation relevance
+    if (profile.transportation && item.relevantInterests) {
+      if (profile.transportation === 'public_transit' && 
+          item.relevantInterests.includes('public_transportation')) {
+        score += 3;
+      } else if (profile.transportation === 'car' && 
+                 item.relevantInterests.includes('infrastructure')) {
+        score += 2;
+      }
+    }
+    
+    // Health coverage relevance
+    if (profile.health_coverage && item.relevantInterests) {
+      if (profile.health_coverage === 'none' && 
+          item.relevantInterests.includes('healthcare_access')) {
+        score += 4;
+      } else if (profile.health_coverage === 'private' && 
+                 item.relevantInterests.includes('affordable_healthcare')) {
+        score += 2;
+      }
+    }
+    
+    // Education relevance
+    if (profile.education && item.relevantInterests) {
+      if (profile.education && 
+          item.relevantInterests.includes('education_policy')) {
+        score += 2;
+      }
+    }
+    
+    // Voting frequency engagement
+    if (profile.voting_frequency && profile.voting_frequency === 'always' && 
+        item.category === 'Economic') {
+      score += 1; // Engaged voters get slight boost for economic bills
+    }
+    
     // Age relevance
     if (profile.age && item.ageRelevance) {
       const age = parseInt(profile.age);
@@ -634,25 +715,99 @@ function MainApp() {
     return Math.max(score, 0.1); // Minimum score to ensure items aren't completely filtered out
   };
 
-  const filteredAndSortedLegislation = sampleLegislation
-    .filter(item => {
-      // Basic filter checks (category and scope)
-      const matchesCategory = activeFilter === 'All Issues' || item.category === activeFilter;
-      const matchesScope = activeScope === 'All Levels' || item.scope === activeScope;
+  // Generate explanation for why a bill is relevant to the user
+  const generateRelevanceExplanation = (item, profile, score) => {
+    if (!profile || score <= 1) return null;
+
+    const reasons = [];
+    
+    // Location-based relevance
+    if (item.scope === 'Federal') {
+      reasons.push('affects all Americans');
+    } else if (profile.location && item.location && 
+               item.location.toLowerCase().includes(profile.location.toLowerCase())) {
+      reasons.push(`directly impacts your area (${profile.location})`);
+    }
+
+    // Veteran status
+    if (profile.is_veteran && item.veteranStatus?.includes('required')) {
+      reasons.push('provides specific benefits for veterans');
+    }
+
+    // Employment/Industry
+    if (profile.employment_status === 'unemployed' && 
+        item.relevantDemographics?.includes('unemployed')) {
+      reasons.push('addresses unemployment concerns');
+    }
+    if (profile.industry && item.industryRelevance?.includes(profile.industry.toLowerCase())) {
+      reasons.push(`relevant to the ${profile.industry} industry`);
+    }
+
+    // Family situation
+    if (profile.dependents && parseInt(profile.dependents) > 0 && 
+        item.relevantDemographics?.includes('families_with_children')) {
+      reasons.push('affects families with children');
+    }
+
+    // Income relevance
+    if (profile.monthly_income) {
+      const income = parseInt(profile.monthly_income);
+      if (income < 3000 && item.incomeRelevance?.includes('low_to_moderate_income')) {
+        reasons.push('designed to help lower-income households');
+      }
+    }
+
+    // Transportation
+    if (profile.transportation === 'public_transit' && 
+        item.relevantInterests?.includes('public_transportation')) {
+      reasons.push('improves public transportation options');
+    }
+
+    // Health coverage
+    if (profile.health_coverage === 'none' && 
+        item.relevantInterests?.includes('healthcare_access')) {
+      reasons.push('expands healthcare access for uninsured individuals');
+    }
+
+    // Interests and priorities
+    if (profile.political_interests && item.relevantInterests) {
+      const userInterests = profile.political_interests.toLowerCase();
+      const matchingInterests = item.relevantInterests.filter(interest =>
+        userInterests.includes(interest.toLowerCase())
+      );
+      if (matchingInterests.length > 0) {
+        reasons.push(`aligns with your interests in ${matchingInterests.join(', ')}`);
+      }
+    }
+
+    if (reasons.length === 0) return null;
+
+    return `This bill is relevant to you because it ${reasons.slice(0, 3).join(', ')}.`;
+  };
+
+  // Apply smart filtering to live legislation data
+  const filteredAndSortedLegislation = liveLegislation
+    .map(item => {
+      // Add smart filtering tags if they don't exist (for live data)
+      const enhancedItem = {
+        ...item,
+        relevantDemographics: item.relevantDemographics || [],
+        relevantInterests: item.relevantInterests || [],
+        householdRelevance: item.householdRelevance || [],
+        incomeRelevance: item.incomeRelevance || [],
+        locationTags: item.locationTags || [],
+        priorityMatch: item.priorityMatch || []
+      };
       
-      // Location filter - more permissive for personalized experience
-      const matchesLocation = !userProfile?.location || 
-        item.scope === 'Federal' || 
-        !item.location || 
-        item.location.toLowerCase().includes(userProfile.location.toLowerCase()) ||
-        userProfile.location.toLowerCase().includes(item.location.toLowerCase());
+      const score = calculateRelevanceScore(enhancedItem, userProfile);
+      const explanation = generateRelevanceExplanation(enhancedItem, userProfile, score);
       
-      return matchesCategory && matchesScope && matchesLocation;
+      return {
+        ...enhancedItem,
+        relevanceScore: score,
+        relevanceExplanation: explanation
+      };
     })
-    .map(item => ({
-      ...item,
-      relevanceScore: calculateRelevanceScore(item, userProfile)
-    }))
     .sort((a, b) => {
       // Sort by relevance score (highest first), then by financial effect if benefits
       if (b.relevanceScore !== a.relevanceScore) {
@@ -666,12 +821,14 @@ function MainApp() {
 
   const filteredLegislation = filteredAndSortedLegislation;
 
-  if (loading) {
+  if (loading || legislationLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">
+            {loading ? 'Loading...' : 'Loading legislation...'}
+          </p>
         </div>
       </div>
     );
@@ -761,6 +918,30 @@ function MainApp() {
           )}
         </div>
       </div>
+
+      {/* Legislation Error/Status Section */}
+      {legislationError && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                {legislationError} Using sample data for now.
+                <button 
+                  onClick={refreshLegislation}
+                  className="ml-2 text-yellow-800 underline hover:text-yellow-900"
+                >
+                  Try again
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* User Representatives Section */}
       {userProfile?.location && (

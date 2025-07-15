@@ -133,14 +133,18 @@ class CongressService {
   transformBillData(apiBill) {
     if (!apiBill) return null;
 
+    const title = apiBill.title || 'Untitled Bill';
+    const summary = apiBill.summaries?.[0]?.text || apiBill.summary?.text || '';
+    const subjects = apiBill.subjects || [];
+
     return {
       id: `${apiBill.congress}-${apiBill.type}-${apiBill.number}`,
-      title: apiBill.title || 'Untitled Bill',
+      title: title,
       status: this.mapBillStatus(apiBill.latestAction),
-      category: this.mapBillCategory(apiBill.policyArea?.name || apiBill.subjects?.[0]?.name),
+      category: this.mapBillCategory(apiBill.policyArea?.name || subjects?.[0]?.name),
       scope: 'Federal',
-      description: apiBill.summary?.text || apiBill.title,
-      summary: apiBill.summaries?.[0]?.text || '',
+      description: summary || title,
+      summary: summary,
       billNumber: `${apiBill.type}.${apiBill.number}`,
       congress: apiBill.congress,
       chamber: apiBill.originChamber?.toLowerCase() || 'house',
@@ -153,6 +157,13 @@ class CongressService {
       lastAction: apiBill.latestAction?.text,
       lastActionDate: apiBill.latestAction?.actionDate,
       url: apiBill.url,
+      // Add smart filtering tags for federal bills
+      relevantDemographics: this.inferDemographics(title, summary, subjects),
+      relevantInterests: this.inferInterests(title, summary, subjects),
+      householdRelevance: this.inferHouseholdRelevance(title, summary),
+      incomeRelevance: this.inferIncomeRelevance(title, summary),
+      locationTags: ['federal'],
+      priorityMatch: this.inferPriorities(title, summary, subjects),
       // These would need to be calculated or fetched separately
       personalImpact: null,
       financialEffect: null,
@@ -164,6 +175,164 @@ class CongressService {
 
   transformBillsData(apiBills) {
     return apiBills.map(bill => this.transformBillData(bill));
+  }
+
+  // Infer demographic relevance from bill content
+  inferDemographics(title, summary, subjects) {
+    const content = `${title} ${summary}`.toLowerCase();
+    const demographics = [];
+
+    if (content.includes('veteran') || content.includes('military') || content.includes('armed forces')) {
+      demographics.push('veterans', 'military_families');
+    }
+    if (content.includes('senior') || content.includes('elderly') || content.includes('medicare')) {
+      demographics.push('seniors');
+    }
+    if (content.includes('student') || content.includes('education') || content.includes('college')) {
+      demographics.push('students', 'families_with_children');
+    }
+    if (content.includes('low income') || content.includes('poverty') || content.includes('snap') || content.includes('medicaid')) {
+      demographics.push('low_income');
+    }
+    if (content.includes('small business') || content.includes('entrepreneur') || content.includes('startup')) {
+      demographics.push('small_business_owners');
+    }
+    if (content.includes('worker') || content.includes('employee') || content.includes('labor') || content.includes('unemployment')) {
+      demographics.push('workers');
+    }
+    if (content.includes('homeowner') || content.includes('mortgage') || content.includes('property tax')) {
+      demographics.push('homeowners');
+    }
+    if (content.includes('renter') || content.includes('tenant') || content.includes('rental')) {
+      demographics.push('renters');
+    }
+    if (content.includes('unemployed') || content.includes('unemployment insurance')) {
+      demographics.push('unemployed');
+    }
+    if (content.includes('family') || content.includes('child') || content.includes('parent')) {
+      demographics.push('families_with_children');
+    }
+
+    return demographics;
+  }
+
+  // Infer interest relevance from bill content
+  inferInterests(title, summary, subjects) {
+    const content = `${title} ${summary}`.toLowerCase();
+    const interests = [];
+
+    if (content.includes('healthcare') || content.includes('health insurance') || content.includes('medical') || content.includes('medicare') || content.includes('medicaid')) {
+      interests.push('healthcare_access', 'affordable_healthcare');
+    }
+    if (content.includes('housing') || content.includes('rent') || content.includes('mortgage') || content.includes('affordable housing')) {
+      interests.push('housing_affordability', 'housing_policy');
+    }
+    if (content.includes('environment') || content.includes('climate') || content.includes('pollution') || content.includes('clean energy')) {
+      interests.push('environmental_protection', 'climate_action');
+    }
+    if (content.includes('tax') || content.includes('taxation') || content.includes('irs')) {
+      interests.push('tax_policy');
+    }
+    if (content.includes('transport') || content.includes('transit') || content.includes('highway') || content.includes('infrastructure')) {
+      interests.push('public_transportation', 'infrastructure');
+    }
+    if (content.includes('education') || content.includes('school') || content.includes('college') || content.includes('student loan')) {
+      interests.push('education_policy');
+    }
+    if (content.includes('gun') || content.includes('firearm') || content.includes('safety') || content.includes('crime')) {
+      interests.push('public_safety');
+    }
+    if (content.includes('economic') || content.includes('business') || content.includes('employment') || content.includes('jobs')) {
+      interests.push('economic_development');
+    }
+    if (content.includes('veteran') || content.includes('military') || content.includes('va ')) {
+      interests.push('veterans_affairs', 'military_benefits');
+    }
+    if (content.includes('trade') || content.includes('import') || content.includes('export')) {
+      interests.push('trade_policy');
+    }
+
+    return interests;
+  }
+
+  // Infer household relevance from bill content
+  inferHouseholdRelevance(title, summary) {
+    const content = `${title} ${summary}`.toLowerCase();
+    const relevance = [];
+
+    if (content.includes('family') || content.includes('child') || content.includes('parent') || content.includes('dependent')) {
+      relevance.push('families_with_children');
+    }
+    if (content.includes('single') || content.includes('individual')) {
+      relevance.push('single_person_households');
+    }
+    if (content.includes('senior') || content.includes('elderly') || content.includes('medicare')) {
+      relevance.push('senior_households');
+    }
+    if (content.includes('military family') || content.includes('veteran family')) {
+      relevance.push('military_households');
+    }
+
+    return relevance.length > 0 ? relevance : ['any_household_size'];
+  }
+
+  // Infer income relevance from bill content
+  inferIncomeRelevance(title, summary) {
+    const content = `${title} ${summary}`.toLowerCase();
+
+    if (content.includes('low income') || content.includes('poverty') || content.includes('assistance') || content.includes('snap') || content.includes('medicaid')) {
+      return ['low_income'];
+    }
+    if (content.includes('middle class') || content.includes('working families') || content.includes('median income')) {
+      return ['middle_income'];
+    }
+    if (content.includes('high earner') || content.includes('wealthy') || content.includes('estate tax')) {
+      return ['high_income'];
+    }
+    if (content.includes('small business') || content.includes('entrepreneur')) {
+      return ['middle_income', 'small_business'];
+    }
+
+    return ['any_income'];
+  }
+
+  // Infer priority matching from bill content
+  inferPriorities(title, summary, subjects) {
+    const content = `${title} ${summary}`.toLowerCase();
+    const priorities = [];
+
+    if (content.includes('affordable housing') || content.includes('rent control') || content.includes('housing credit')) {
+      priorities.push('affordable_housing', 'cost_of_living');
+    }
+    if (content.includes('healthcare cost') || content.includes('medical expense') || content.includes('prescription drug')) {
+      priorities.push('healthcare_access', 'healthcare_costs');
+    }
+    if (content.includes('job') || content.includes('employment') || content.includes('wage') || content.includes('minimum wage')) {
+      priorities.push('job_security', 'fair_wages');
+    }
+    if (content.includes('education funding') || content.includes('school budget') || content.includes('student loan')) {
+      priorities.push('education_quality', 'education_funding');
+    }
+    if (content.includes('environment') || content.includes('clean') || content.includes('climate change')) {
+      priorities.push('environmental_protection');
+    }
+    if (content.includes('public safety') || content.includes('crime') || content.includes('law enforcement')) {
+      priorities.push('public_safety');
+    }
+    if (content.includes('transport') || content.includes('road') || content.includes('infrastructure') || content.includes('bridge')) {
+      priorities.push('transportation_access', 'infrastructure');
+    }
+    if (content.includes('tax relief') || content.includes('tax cut') || content.includes('tax credit')) {
+      priorities.push('tax_relief', 'financial_stability');
+    }
+    if (content.includes('veteran') || content.includes('military benefit')) {
+      priorities.push('veterans_benefits', 'military_support');
+    }
+    if (content.includes('retirement') || content.includes('social security') || content.includes('pension')) {
+      priorities.push('retirement_security', 'financial_planning');
+    }
+
+    return priorities;
   }
 
   // Map Congress.gov status to our simplified status
