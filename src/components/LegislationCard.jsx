@@ -183,6 +183,16 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 mx-4 mb-4 p-4">
+      {/* Sample Content Warning */}
+      {legislation.isSampleContent && (
+        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded">
+          <p className="text-xs text-blue-800">
+            🔬 <strong>Demo Content:</strong> This is AI-generated sample content for your area. 
+            Real local measures will be integrated from official sources.
+          </p>
+        </div>
+      )}
+      
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 pr-2">
           <div className="flex items-center mb-1">
@@ -384,15 +394,35 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
           <h4 className="text-sm font-medium text-gray-700 mb-2">Voting Options</h4>
           <div className="flex space-x-2">
             {legislation.votingOptions.map((option, index) => (
-              <span key={index} className="px-2 py-1 bg-white border border-amber-200 rounded text-xs">
+              <button 
+                key={index} 
+                className="px-3 py-2 bg-white border border-amber-200 rounded text-xs hover:bg-amber-100 transition-colors cursor-pointer"
+                onClick={() => {
+                  // For sample content, show info modal
+                  if (legislation.id?.toString().includes('generic') || !legislation.sourceUrl) {
+                    alert(`This is sample content for demonstration. In a real election, clicking "${option}" would record your vote preference and provide information about the voting process.`);
+                  } else {
+                    // For real content, could integrate with voting registration systems
+                    alert(`Learn more about voting "${option}" on this measure. This would link to official voting information.`);
+                  }
+                }}
+              >
                 {option}
-              </span>
+              </button>
             ))}
           </div>
           {legislation.electionDate && (
             <p className="text-xs text-amber-700 mt-2">
               Election Date: {new Date(legislation.electionDate).toLocaleDateString()}
             </p>
+          )}
+          {(!legislation.sourceUrl && !legislation.billNumber) && (
+            <div className="mt-2 p-2 bg-orange-100 border border-orange-200 rounded">
+              <p className="text-xs text-orange-800">
+                ⚠️ <strong>Sample Content:</strong> This is template content for demonstration. 
+                Real ballot measures would include official source links and voting registration information.
+              </p>
+            </div>
           )}
         </div>
       )}

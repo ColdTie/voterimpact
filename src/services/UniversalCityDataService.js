@@ -114,7 +114,8 @@ class UniversalCityDataService {
       financialEffect: -200,
       timeline: '2-3 years',
       confidence: 70,
-      isBenefit: true
+      isBenefit: true,
+      isSampleContent: true
     });
 
     // Budget item
@@ -139,7 +140,8 @@ class UniversalCityDataService {
       financialEffect: 0,
       timeline: '1 year',
       confidence: 85,
-      isBenefit: true
+      isBenefit: true,
+      isSampleContent: true
     });
 
     return content;

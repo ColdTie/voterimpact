@@ -184,7 +184,8 @@ export function generateLocalContentTemplates(userLocation) {
     financialEffect: -120,
     timeline: '2-3 years',
     confidence: 65,
-    isBenefit: true
+    isBenefit: true,
+    isSampleContent: true
   });
 
   // Generic public safety measure
@@ -215,7 +216,8 @@ export function generateLocalContentTemplates(userLocation) {
     financialEffect: -150,
     timeline: '6-12 months',
     confidence: 80,
-    isBenefit: false
+    isBenefit: false,
+    isSampleContent: true
   });
 
   // Generic school funding measure
@@ -246,7 +248,8 @@ export function generateLocalContentTemplates(userLocation) {
       financialEffect: 0,
       timeline: '1-2 years',
       confidence: 55,
-      isBenefit: true
+      isBenefit: true,
+      isSampleContent: true
     });
   }
 
