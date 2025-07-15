@@ -234,21 +234,21 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
           
           <div className="grid grid-cols-1 gap-2">
             {legislation.votingRecord.committee && (
-              <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center gap-3 text-xs">
                 <span className="text-gray-600">Committee Vote:</span>
                 <VoteCountBadge votes={legislation.votingRecord.committee} chamber="committee" />
               </div>
             )}
             
             {legislation.votingRecord.senate && (
-              <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center gap-3 text-xs">
                 <span className="text-gray-600">Senate Vote:</span>
                 <VoteCountBadge votes={legislation.votingRecord.senate} chamber="senate" />
               </div>
             )}
             
             {legislation.votingRecord.house && (
-              <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center gap-3 text-xs">
                 <span className="text-gray-600">House Vote:</span>
                 <VoteCountBadge votes={legislation.votingRecord.house} chamber="house" />
               </div>
