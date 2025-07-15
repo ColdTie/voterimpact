@@ -39,7 +39,10 @@ class UniversalDataSources {
     try {
       // OpenStates API
       const openStatesKey = process.env.REACT_APP_OPENSTATES_API_KEY;
-      if (!openStatesKey) return [];
+      if (!openStatesKey) {
+        console.log('⚠️ No OpenStates API key found - using fallback sample state data');
+        return this.generateSampleStateBills(stateCode, limit);
+      }
 
       const url = `https://v3.openstates.org/bills?jurisdiction=${stateCode}&sort=-updated_at&per_page=${limit}`;
       
@@ -47,13 +50,23 @@ class UniversalDataSources {
         headers: { 'X-API-KEY': openStatesKey }
       });
       
-      if (!response.ok) throw new Error(`OpenStates API error: ${response.status}`);
+      if (!response.ok) {
+        console.log(`⚠️ OpenStates API failed (${response.status}) - using sample state data`);
+        return this.generateSampleStateBills(stateCode, limit);
+      }
       
       const data = await response.json();
-      return this.transformOpenStatesBills(data.results || []);
+      const bills = this.transformOpenStatesBills(data.results || []);
+      
+      if (bills.length === 0) {
+        console.log('⚠️ No state bills returned from API - using sample data');
+        return this.generateSampleStateBills(stateCode, limit);
+      }
+      
+      return bills;
     } catch (error) {
       console.error('State bills fetch error:', error);
-      return [];
+      return this.generateSampleStateBills(stateCode, limit);
     }
   }
 
@@ -78,6 +91,12 @@ class UniversalDataSources {
         console.log(`Local source ${index + 1} failed:`, result.reason);
       }
     });
+
+    // If no real local data, generate sample local content
+    if (results.length === 0) {
+      console.log('⚠️ No real local data available - generating sample local content');
+      results.push(...this.generateSampleLocalContent(location));
+    }
 
     return results;
   }
@@ -332,6 +351,122 @@ class UniversalDataSources {
     return [];
   }
 
+  // Get state name from state code
+  getStateNameFromCode(code) {
+    const stateMap = {
+      'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+      'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+      'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+      'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+      'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+      'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+      'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+      'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+      'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+      'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+    };
+    return stateMap[code?.toUpperCase()] || code;
+  }
+
+  // Generate sample state bills when API fails
+  generateSampleStateBills(stateCode, limit = 5) {
+    const stateName = this.getStateNameFromCode(stateCode);
+    return [
+      {
+        id: `${stateCode}-sample-veterans-1`,
+        type: 'state_bill',
+        title: `${stateName} Veterans Property Tax Exemption Act`,
+        status: 'In Committee',
+        scope: 'State',
+        category: 'Veterans Affairs',
+        description: `Expands property tax exemptions for disabled veterans in ${stateName}`,
+        billNumber: 'SB 2024-001',
+        sponsor: `${stateName} State Senator`,
+        dateIntroduced: '2025-01-15',
+        location: { state: stateName, stateCode: stateCode },
+        personalImpact: 'As a veteran, this could reduce your property taxes significantly.',
+        financialEffect: 1200,
+        timeline: '6-8 months',
+        confidence: 75,
+        isBenefit: true,
+        isSampleContent: true,
+        relevantDemographics: ['veterans', 'homeowners'],
+        relevantInterests: ['veterans_affairs', 'tax_policy']
+      },
+      {
+        id: `${stateCode}-sample-healthcare-1`,
+        type: 'state_bill', 
+        title: `${stateName} Healthcare Worker Support Act`,
+        status: 'Passed Assembly',
+        scope: 'State',
+        category: 'Healthcare',
+        description: `Provides additional benefits and protections for healthcare workers in ${stateName}`,
+        billNumber: 'AB 2024-045',
+        sponsor: `${stateName} Assembly Member`,
+        dateIntroduced: '2025-02-01',
+        location: { state: stateName, stateCode: stateCode },
+        personalImpact: 'As a healthcare worker, this could provide additional job protections and benefits.',
+        financialEffect: 800,
+        timeline: '3-4 months',
+        confidence: 80,
+        isBenefit: true,
+        isSampleContent: true,
+        relevantDemographics: ['healthcare_workers'],
+        relevantInterests: ['healthcare_policy', 'worker_rights']
+      }
+    ].slice(0, limit);
+  }
+
+  // Generate sample local content when APIs fail
+  generateSampleLocalContent(location) {
+    const { city, state } = this.parseLocation(location);
+    const cityName = city || 'Local';
+    
+    return [
+      {
+        id: `${cityName.toLowerCase()}-infrastructure-2025`,
+        type: 'ballot_measure',
+        title: `${cityName} Infrastructure Bond Measure`,
+        status: 'On Ballot',
+        scope: 'Local',
+        category: 'Infrastructure',
+        description: `$50 million bond measure to improve roads, bridges, and public facilities in ${cityName}`,
+        location: location,
+        electionDate: '2025-11-04',
+        votingOptions: ['Yes', 'No'],
+        personalImpact: 'This infrastructure bond could improve roads and services in your area but may increase property taxes.',
+        financialEffect: -150,
+        timeline: '2-3 years',
+        confidence: 70,
+        isBenefit: true,
+        isSampleContent: true,
+        relevantDemographics: ['homeowners', 'commuters', 'all_residents'],
+        relevantInterests: ['infrastructure', 'transportation', 'public_services']
+      },
+      {
+        id: `${cityName.toLowerCase()}-public-safety-2025`,
+        type: 'ballot_measure',
+        title: `${cityName} Public Safety Enhancement Tax`,
+        status: 'On Ballot', 
+        scope: 'Local',
+        category: 'Public Safety',
+        description: `0.5% sales tax increase to fund additional police officers and fire department equipment in ${cityName}`,
+        location: location,
+        electionDate: '2025-11-04',
+        votingOptions: ['Yes', 'No'],
+        taxImpact: 0.005,
+        personalImpact: 'This would increase local sales tax to fund enhanced police and fire services.',
+        financialEffect: -200,
+        timeline: '6-12 months',
+        confidence: 75,
+        isBenefit: false,
+        isSampleContent: true,
+        relevantDemographics: ['all_residents'],
+        relevantInterests: ['public_safety', 'tax_policy']
+      }
+    ];
+  }
+
   // Main entry point - get all relevant content for any location
   async getAllContent(userLocation, userProfile = {}) {
     const results = [];
@@ -341,8 +476,8 @@ class UniversalDataSources {
     try {
       // Fetch all data sources in parallel
       const [federalBills, stateBills, localContent] = await Promise.allSettled([
-        this.getFederalBills(10),
-        stateCode ? this.getStateBills(stateCode, 8) : Promise.resolve([]),
+        this.getFederalBills(6),
+        stateCode ? this.getStateBills(stateCode, 4) : Promise.resolve([]),
         this.getLocalContent(userLocation)
       ]);
 
@@ -352,6 +487,10 @@ class UniversalDataSources {
       if (localContent.status === 'fulfilled') results.push(...localContent.value);
 
       console.log(`Fetched ${results.length} real items for ${userLocation}`);
+      console.log(`- Federal: ${federalBills.status === 'fulfilled' ? federalBills.value.length : 0}`);
+      console.log(`- State: ${stateBills.status === 'fulfilled' ? stateBills.value.length : 0}`);
+      console.log(`- Local: ${localContent.status === 'fulfilled' ? localContent.value.length : 0}`);
+      
       return results;
 
     } catch (error) {
