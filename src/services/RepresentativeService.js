@@ -140,17 +140,17 @@ class RepresentativeService {
     // Add generic House representative
     const houseRep = {
       id: `${state.toLowerCase()}-house-fallback`,
-      name: 'Your House Representative',
+      name: `${stateFullName} House Representative`,
       title: 'Representative',
       position: 'Representative',
-      party: 'Determining...',
+      party: 'Varies by District',
       state: stateFullName,
       office: 'U.S. House',
       photo_url: null,
       photo: null,
       website: 'https://www.house.gov/representatives/find-your-representative',
       source: 'fallback',
-      note: 'Exact representative depends on your specific district. Please visit house.gov to find your representative.'
+      note: 'Exact representative depends on your specific district. Click to find your representative on house.gov.'
     };
 
     return [...senators, houseRep];

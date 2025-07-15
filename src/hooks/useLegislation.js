@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import CongressService from '../services/CongressService';
+import OpenStatesService from '../services/OpenStatesService';
 import { analyzePersonalImpact } from '../services/claudeService';
+import locationParser from '../utils/locationParser';
 
 // Fallback to sample data if API fails
 import { sampleLegislation } from '../data/sampleLegislation';
@@ -23,31 +25,89 @@ export const useLegislation = (userProfile, filters = {}) => {
 
       const currentPage = reset ? 0 : page;
       
-      // Try to fetch from Congress.gov API
+      // Parse user location for state/local legislation
+      const parsedLocation = userProfile?.location ? 
+        locationParser.parseLocation(userProfile.location) : null;
+      
+      // Fetch different types of legislation based on scope filter
       let bills = [];
       
-      if (searchQuery) {
-        bills = await CongressService.searchBills(searchQuery, {
-          limit: pageSize,
-          offset: currentPage * pageSize
-        });
-      } else {
-        const response = await CongressService.getRecentBills({
-          limit: pageSize,
-          offset: currentPage * pageSize
-        });
-        bills = response;
+      if (scope === 'Federal' || scope === 'All Levels') {
+        // Fetch federal bills from Congress.gov
+        let federalBills = [];
+        if (searchQuery) {
+          federalBills = await CongressService.searchBills(searchQuery, {
+            limit: pageSize,
+            offset: currentPage * pageSize
+          });
+        } else {
+          federalBills = await CongressService.getRecentBills({
+            limit: pageSize,
+            offset: currentPage * pageSize
+          });
+        }
+        bills = [...bills, ...federalBills];
+      }
+      
+      if ((scope === 'State' || scope === 'All Levels') && parsedLocation?.stateCode) {
+        // Fetch state bills from OpenStates
+        try {
+          let stateBills = [];
+          if (searchQuery) {
+            stateBills = await OpenStatesService.searchStateBills(
+              parsedLocation.stateCode, 
+              searchQuery, 
+              { limit: Math.floor(pageSize / 2), page: currentPage + 1 }
+            );
+          } else {
+            stateBills = await OpenStatesService.getStateBills(
+              parsedLocation.stateCode, 
+              { limit: Math.floor(pageSize / 2), page: currentPage + 1 }
+            );
+          }
+          bills = [...bills, ...stateBills];
+        } catch (error) {
+          console.error('Error fetching state bills:', error);
+        }
+      }
+      
+      // If no real data and it's the first page, use sample data
+      if (bills.length === 0 && currentPage === 0) {
+        bills = sampleLegislation;
       }
 
-      // Filter by category and scope if needed
+      // Filter by category if needed
       let filteredBills = bills;
       
       if (category && category !== 'All Issues') {
         filteredBills = filteredBills.filter(bill => bill.category === category);
       }
       
+      // Additional scope filtering (in case we have mixed data)
       if (scope && scope !== 'All Levels') {
         filteredBills = filteredBills.filter(bill => bill.scope === scope);
+      }
+      
+      // Location-based filtering for relevant local bills
+      if (parsedLocation?.city && userProfile?.location) {
+        filteredBills = filteredBills.filter(bill => {
+          // Include federal bills
+          if (bill.scope === 'Federal') return true;
+          
+          // Include state bills for user's state
+          if (bill.scope === 'State' && bill.location?.includes(parsedLocation.state)) return true;
+          
+          // Include local bills for user's area
+          if (bill.scope === 'Local') {
+            const billLocation = bill.location?.toLowerCase() || '';
+            const userCity = parsedLocation.city?.toLowerCase() || '';
+            const userState = parsedLocation.state?.toLowerCase() || '';
+            
+            return billLocation.includes(userCity) || billLocation.includes(userState);
+          }
+          
+          return true;
+        });
       }
 
       // Add personal impact analysis for each bill (if user profile exists)

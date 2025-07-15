@@ -4,18 +4,21 @@ const DataSourceConfig = ({ onClose }) => {
   const [config, setConfig] = useState({
     useRealData: localStorage.getItem('useRealData') === 'true',
     congressApiKey: localStorage.getItem('congressApiKey') || '',
-    openStatesApiKey: localStorage.getItem('openStatesApiKey') || ''
+    openStatesApiKey: localStorage.getItem('openStatesApiKey') || '',
+    googleCivicApiKey: localStorage.getItem('googleCivicApiKey') || ''
   });
 
   const [testStatus, setTestStatus] = useState({
     congress: null,
-    openStates: null
+    openStates: null,
+    googleCivic: null
   });
 
   const handleSave = () => {
     localStorage.setItem('useRealData', config.useRealData);
     localStorage.setItem('congressApiKey', config.congressApiKey);
     localStorage.setItem('openStatesApiKey', config.openStatesApiKey);
+    localStorage.setItem('googleCivicApiKey', config.googleCivicApiKey);
     
     // Update environment variables
     if (config.congressApiKey) {
@@ -23,6 +26,9 @@ const DataSourceConfig = ({ onClose }) => {
     }
     if (config.openStatesApiKey) {
       process.env.REACT_APP_OPENSTATES_API_KEY = config.openStatesApiKey;
+    }
+    if (config.googleCivicApiKey) {
+      process.env.REACT_APP_GOOGLE_CIVIC_API_KEY = config.googleCivicApiKey;
     }
     
     onClose();
@@ -113,6 +119,30 @@ const DataSourceConfig = ({ onClose }) => {
                   className="text-blue-600 underline"
                 >
                   api.data.gov
+                </a>
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Google Civic Information API Key
+              </label>
+              <input
+                type="text"
+                value={config.googleCivicApiKey}
+                onChange={(e) => setConfig({ ...config, googleCivicApiKey: e.target.value })}
+                placeholder="For accurate representative lookup"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Get your free API key at{' '}
+                <a 
+                  href="https://console.developers.google.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  Google Cloud Console
                 </a>
               </p>
             </div>
