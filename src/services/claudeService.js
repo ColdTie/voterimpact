@@ -25,11 +25,31 @@ KEY PROVISIONS:
 ${legislation.keyProvisions.map(provision => `• ${provision}`).join('\n')}
 ` : ''}
 
+${legislation.fullTextExcerpts ? `
+ACTUAL BILL TEXT EXCERPTS:
+${legislation.fullTextExcerpts.impactSections ? `
+Impact Sections:
+${legislation.fullTextExcerpts.impactSections.map(section => `"${section}"`).join('\n\n')}
+` : ''}
+
+${legislation.fullTextExcerpts.eligibilityText ? `
+Eligibility Requirements:
+"${legislation.fullTextExcerpts.eligibilityText}"
+` : ''}
+
+${legislation.fullTextExcerpts.financialImpact ? `
+Financial Impact Details:
+"${legislation.fullTextExcerpts.financialImpact}"
+` : ''}
+` : 'WARNING: No actual bill text available - analysis will be limited to summary information only.'}
+
 CRITICAL INSTRUCTIONS:
+- When actual bill text excerpts are provided, use them for specific, detailed analysis
+- Quote specific sections and dollar amounts from the actual bill text when available
 - If the status is "Passed" or "Signed into law", acknowledge this has already been enacted
 - If only a title and brief description are provided, state that detailed analysis requires the full bill text
-- DO NOT make up specific financial amounts, percentages, or benefits not explicitly stated
-- DO NOT assume benefits based solely on bill titles
+- DO NOT make up specific financial amounts, percentages, or benefits not explicitly stated in the bill text
+- When bill text is available, provide specific timelines, eligibility criteria, and implementation details
 - If the description seems generic or incomplete, mention this limitation in your response
 
 USER PROFILE:

@@ -17,6 +17,14 @@ export const federalSampleContent = [
       'Income targeting: 10% of credits reserved for extremely low-income families',
       'Rural set-aside increased from 10% to 15%'
     ],
+    fullTextExcerpts: {
+      impactSections: [
+        "SEC. 103. INCREASE IN HOUSING CREDIT DOLLAR AMOUNT. Section 42(h)(3)(C) is amended by striking '$2.30' and inserting '$3.45'. This increases the per-capita housing credit authority from $2.30 to $3.45 per resident.",
+        "SEC. 105. TARGETING REQUIREMENTS. Not less than 10 percent of housing credit allocations in each State shall be reserved for projects serving households with incomes not exceeding 30 percent of area median income."
+      ],
+      eligibilityText: "Projects receiving housing credits under this section must maintain affordability for not less than 30 years. Tenants must have household incomes not exceeding 60 percent of area median income, with rent not exceeding 30 percent of applicable income limit.",
+      financialImpact: "The increased credit authority is projected to create 300,000 additional affordable housing units over 10 years, potentially reducing rental costs by $150-400 per month in participating developments."
+    },
     sponsor: 'Sen. Bernie Sanders (I-VT)',
     dateIntroduced: '2025-03-15',
     estimatedCost: 12000000000,
@@ -47,6 +55,14 @@ export const federalSampleContent = [
       'Adds 50 new VA clinics in underserved areas',
       'Increases mental health provider staffing by 25%'
     ],
+    fullTextExcerpts: {
+      impactSections: [
+        "SEC. 201. ELIMINATION OF COPAYMENTS. Section 1722A(a) of title 38, United States Code, is amended by adding 'No copayment shall be required for mental health care services provided under this section, including individual therapy, group therapy, psychiatric consultations, and crisis intervention services.'",
+        "SEC. 203. SAME-DAY CRISIS CARE. The Secretary shall ensure that any veteran requesting crisis mental health care receives an appointment on the same day such care is requested, either in person or through telehealth services."
+      ],
+      eligibilityText: "All veterans enrolled in VA healthcare are eligible for expanded mental health services regardless of service-connected disability rating or income level.",
+      financialImpact: "Veterans currently paying copays for mental health services will save an average of $150 per session. Crisis intervention services previously unavailable will provide immediate support during mental health emergencies."
+    },
     sponsor: 'Rep. Mark Takano (D-CA)',
     dateIntroduced: '2025-02-01',
     estimatedCost: 18500000000,
@@ -77,6 +93,14 @@ export const federalSampleContent = [
       'Affordable internet access programs',
       'Municipal broadband support'
     ],
+    fullTextExcerpts: {
+      impactSections: [
+        "SEC. 301. BROADBAND INFRASTRUCTURE DEPLOYMENT. The Secretary shall make grants to eligible entities for the deployment of broadband infrastructure in underserved areas where 25 percent or more of the population lacks access to broadband service with download speeds of at least 25 Mbps and upload speeds of at least 3 Mbps.",
+        "SEC. 305. AFFORDABILITY PROGRAMS. Grant recipients must offer broadband service at rates not exceeding $30 per month for qualifying low-income households with incomes at or below 200 percent of the Federal Poverty Guidelines."
+      ],
+      eligibilityText: "Priority given to projects serving rural areas, Tribal lands, and persistent poverty counties. Municipal broadband projects eligible with local government sponsorship.",
+      financialImpact: "Qualifying households can access high-speed internet for $30/month maximum. Infrastructure grants may reduce monthly costs by $20-50 in newly served areas."
+    },
     sponsor: 'Sen. Amy Klobuchar (D-MN)',
     dateIntroduced: '2025-04-10',
     estimatedCost: 50000000000,
@@ -145,6 +169,14 @@ export function generateLocalContentTemplates(userLocation) {
       'Storm water management upgrades',
       'Traffic signal modernization'
     ],
+    fullTextExcerpts: {
+      impactSections: [
+        `SECTION 1. BOND AUTHORIZATION. The City is hereby authorized to incur bonded indebtedness in an amount not to exceed $75,000,000 for the purpose of financing infrastructure improvements including roadway reconstruction, bridge repairs, and accessibility upgrades.`,
+        `SECTION 3. PROJECT TIMELINE. Infrastructure improvements funded by this bond shall commence within 18 months of bond issuance and be substantially completed within 5 years.`
+      ],
+      eligibilityText: `All city residents and property owners will benefit from improved infrastructure. Construction may cause temporary traffic disruptions during project phases.`,
+      financialImpact: `Property taxes will increase by approximately $120 annually for median-value homes to service bond debt over 20-year repayment period.`
+    },
     relevantDemographics: ['commuters', 'homeowners', 'businesses', 'all_residents'],
     relevantInterests: ['infrastructure', 'public_safety', 'property_values'],
     priorityMatch: ['infrastructure', 'community_development'],
