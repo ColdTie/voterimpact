@@ -111,6 +111,7 @@ export const AuthProvider = ({ children }) => {
       return { data, error: null };
     } catch (error) {
       console.error('Error updating profile:', error);
+      console.error('Error details:', error.message, error.details, error.hint);
       return { data: null, error };
     }
   };
