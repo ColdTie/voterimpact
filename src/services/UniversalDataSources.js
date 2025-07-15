@@ -195,7 +195,13 @@ class UniversalDataSources {
       dateIntroduced: bill.introducedDate,
       summary: bill.summary?.text || bill.title,
       sourceUrl: `https://www.congress.gov/bill/${bill.congress}th-congress/${bill.originChamber}-bill/${bill.number.split('.')[1]}`,
-      lastUpdated: bill.updateDate
+      lastUpdated: bill.updateDate,
+      // Add default financial data to prevent NaN
+      personalImpact: 'Impact analysis pending - please refresh AI analysis for details.',
+      financialEffect: 0,
+      timeline: 'Unknown',
+      confidence: 50,
+      isBenefit: null
     }));
   }
 
@@ -214,7 +220,13 @@ class UniversalDataSources {
       dateIntroduced: bill.first_action_date,
       location: { state: bill.jurisdiction.name, stateCode: bill.jurisdiction.jurisdiction_id },
       sourceUrl: bill.sources?.[0]?.url,
-      lastUpdated: bill.updated_at
+      lastUpdated: bill.updated_at,
+      // Add default financial data to prevent NaN
+      personalImpact: 'Impact analysis pending - please refresh AI analysis for details.',
+      financialEffect: 0,
+      timeline: 'Unknown',
+      confidence: 50,
+      isBenefit: null
     }));
   }
 
@@ -236,7 +248,13 @@ class UniversalDataSources {
             location: location,
             electionDate: data.election?.electionDay,
             votingOptions: contest.candidates?.map(c => c.name) || ['Yes', 'No'],
-            sourceUrl: contest.sources?.[0]?.name === 'Ballot Information Project' ? contest.sources[0].url : null
+            sourceUrl: contest.sources?.[0]?.name === 'Ballot Information Project' ? contest.sources[0].url : null,
+            // Add default financial data to prevent NaN
+            personalImpact: 'Impact analysis pending - please refresh AI analysis for details.',
+            financialEffect: 0,
+            timeline: 'Unknown',
+            confidence: 50,
+            isBenefit: null
           });
         }
       });
@@ -279,13 +297,15 @@ class UniversalDataSources {
     const titleLower = title.toLowerCase();
     
     if (titleLower.includes('housing') || titleLower.includes('affordable')) return 'Housing';
-    if (titleLower.includes('veteran') || titleLower.includes('military')) return 'Veterans Affairs';
-    if (titleLower.includes('health') || titleLower.includes('medical')) return 'Healthcare';
+    if (titleLower.includes('veteran') || titleLower.includes('military') || titleLower.includes('armed forces') || titleLower.includes('ready reserve')) return 'Veterans Affairs';
+    if (titleLower.includes('health') || titleLower.includes('medical') || titleLower.includes('drug') || titleLower.includes('animal drug')) return 'Healthcare';
     if (titleLower.includes('education') || titleLower.includes('school')) return 'Education';
     if (titleLower.includes('transport') || titleLower.includes('infrastructure')) return 'Transportation';
     if (titleLower.includes('environment') || titleLower.includes('climate')) return 'Environment';
-    if (titleLower.includes('tax') || titleLower.includes('economic')) return 'Economic';
+    if (titleLower.includes('tax') || titleLower.includes('economic') || titleLower.includes('revenue') || titleLower.includes('internal revenue')) return 'Economic';
     if (titleLower.includes('safety') || titleLower.includes('police')) return 'Public Safety';
+    if (titleLower.includes('emoluments') || titleLower.includes('ethics') || titleLower.includes('transparency') || titleLower.includes('information') || titleLower.includes('internet')) return 'Government Reform';
+    if (titleLower.includes('volunteer') || titleLower.includes('senior')) return 'Social Issues';
     
     return 'Other';
   }
