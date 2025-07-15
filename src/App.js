@@ -88,6 +88,14 @@ const sampleLegislation = [
     confidence: 75,
     isBenefit: true,
     description: 'Extends and expands the Low-Income Housing Tax Credit program to increase affordable housing development nationwide.',
+    summary: 'This bill extends the Low-Income Housing Tax Credit (LIHTC) program through 2030 and increases the annual credit authority by 50%. Key provisions include: (1) Increases the 9% credit allocation to states by 50% annually, (2) Extends the placed-in-service deadline for projects allocated credits in 2020-2023, (3) Allows income averaging across units in a project, (4) Reduces the 50% test for bond-financed developments to 25%, (5) Enables tribal governments to receive direct allocations. The bill aims to create approximately 2 million additional affordable housing units over 10 years, with priority for developments serving extremely low-income families (30% AMI or below).',
+    keyProvisions: [
+      'Annual credit allocation increased by 50% ($2.3 billion to $3.5 billion)',
+      'Income targeting: 10% of credits reserved for developments serving extremely low-income families', 
+      'Geographic distribution: Rural areas receive minimum 15% allocation',
+      'Tenant protections: 30-year affordability period for all LIHTC properties',
+      'Workforce development: Projects must include local hiring requirements'
+    ],
     sponsor: 'sanders-vt',
     cosponsors: ['warren-ma', 'cortez-masto-nv'],
     congress: 118,
@@ -110,6 +118,14 @@ const sampleLegislation = [
     confidence: 35,
     isBenefit: null,
     description: 'Enacted legislation providing federal healthcare premium subsidies for eligible income ranges. Specific impacts depend on individual circumstances and eligibility.',
+    summary: 'This enacted law expands premium tax credits for health insurance purchased through ACA marketplaces. Key provisions: (1) Eliminates the income cap (previously 400% FPL) for premium tax credit eligibility, (2) Increases premium tax credits for families earning 150-400% of Federal Poverty Level, (3) Caps premium costs at 8.5% of income for families above 400% FPL, (4) Provides temporary subsidies for COBRA continuation coverage, (5) Increases subsidies for benchmark silver plans. The law is estimated to reduce premiums by an average of $50-200 per month for middle-income families.',
+    keyProvisions: [
+      'Premium cap: Health insurance premiums limited to 8.5% of household income',
+      'Expanded eligibility: Removes 400% FPL income cap for premium tax credits',
+      'Enhanced subsidies: Increased premium tax credits for incomes 150-400% FPL',
+      'COBRA assistance: Temporary 100% premium subsidies for COBRA coverage',
+      'Coverage improvements: Enhanced cost-sharing reductions for silver plans'
+    ],
     sponsor: 'warren-ma',
     cosponsors: ['sanders-vt', 'rosen-nv'],
     congress: 118,
@@ -133,6 +149,14 @@ const sampleLegislation = [
     confidence: 45,
     isBenefit: false,
     description: 'Proposes increasing federal gas tax by 15 cents per gallon to fund infrastructure improvements.',
+    summary: 'This bill increases the federal excise tax on gasoline and diesel fuel by 15 cents per gallon over a 3-year period (5 cents per year). Revenue generated would fund the Highway Trust Fund for infrastructure repairs and improvements. Key provisions: (1) Gradual implementation starting January 1, 2025, (2) Indexing to inflation after 2027, (3) $180 billion estimated revenue over 10 years, (4) Dedicated funding for bridge repairs and rural road improvements, (5) Electric vehicle charging infrastructure development. The bill includes rebates for low-income drivers and commercial transportation businesses.',
+    keyProvisions: [
+      'Graduated increase: 5¢ per gallon annually for 3 years (total 15¢ increase)',
+      'Revenue allocation: 60% highway repairs, 25% bridge infrastructure, 15% EV charging',
+      'Low-income rebate: $150 annual tax credit for households earning under $50,000',
+      'Commercial exemption: Reduced rate for agricultural and emergency vehicles',
+      'Inflation indexing: Tax rate adjusted annually starting 2028'
+    ],
     sponsor: 'tester-mt',
     cosponsors: [],
     congress: 118,
@@ -157,6 +181,14 @@ const sampleLegislation = [
     confidence: 25,
     isBenefit: null,
     description: 'Proposed legislation related to VA disability coverage and compensation. Full bill text required for detailed analysis.',
+    summary: 'This bill expands VA disability benefits in several key areas: (1) Adds 23 medical conditions to the presumptive list for burn pit and toxic exposure, including respiratory cancers and rare respiratory diseases, (2) Extends the eligibility period for post-9/11 veterans from 10 to 15 years after service, (3) Improves access to mental health care by adding PTSD, anxiety, and depression to expedited claims processing, (4) Enhances vocational rehabilitation benefits with increased monthly allowances, (5) Establishes new regional processing centers to reduce claims backlogs from current 125 days to target 90 days.',
+    keyProvisions: [
+      'Toxic exposure: 23 new conditions added to presumptive list for burn pit exposure',
+      'Timeline extension: Post-9/11 veterans eligible for benefits up to 15 years after service',
+      'Mental health: Expedited processing for PTSD, anxiety, and depression claims',
+      'Vocational rehab: Monthly allowances increased from $737 to $1,200 for full-time students',
+      'Processing improvements: New regional centers to reduce claim processing time by 28%'
+    ],
     sponsor: 'takano-ca',
     cosponsors: ['tester-mt', 'cortez-masto-nv'],
     congress: 118,
@@ -179,6 +211,14 @@ const sampleLegislation = [
     confidence: 30,
     isBenefit: null,
     description: 'Enacted legislation related to military retirement benefits. Specific provisions would need to be reviewed through official military or VA channels.',
+    summary: 'This enacted law modernizes military retirement benefits through the Blended Retirement System (BRS). Key changes: (1) Combines traditional pension with Thrift Savings Plan (TSP) matching, (2) Reduces pension multiplier from 2.5% to 2.0% per year of service, (3) Provides automatic 1% TSP contribution plus up to 4% matching, (4) Introduces mid-career continuation pay at 12 years of service, (5) Establishes lump-sum payment option at retirement. The system applies to service members entering after January 1, 2018, with existing members having opt-in choice.',
+    keyProvisions: [
+      'Hybrid system: Traditional pension plus TSP matching contributions',
+      'Reduced pension: 2.0% per year (down from 2.5%) for 20+ year retirees',
+      'TSP matching: Up to 5% government matching in Thrift Savings Plan',
+      'Continuation pay: Lump sum payment at 12 years of service',
+      'Lump-sum option: Choice of partial lump sum at retirement'
+    ],
     sponsor: 'takano-ca',
     cosponsors: ['tester-mt', 'sanders-vt'],
     congress: 118,
@@ -204,7 +244,15 @@ const sampleLegislation = [
     timeline: '6-12 months',
     confidence: 70,
     isBenefit: true,
-    description: 'Establishes minimum wage standards and job protection rights for Nevada gaming industry employees.'
+    description: 'Establishes minimum wage standards and job protection rights for Nevada gaming industry employees.',
+    summary: 'This Nevada state bill strengthens worker protections in the gaming industry. Key provisions: (1) Establishes $18/hour minimum wage for tipped gaming workers (dealers, cocktail servers), (2) Requires 30-day advance notice for layoffs affecting 25+ employees, (3) Mandates severance pay of 2 weeks per year of service for involuntary terminations, (4) Creates portable benefits system for workers moving between casinos, (5) Establishes worker safety committees with union representation. The bill also includes anti-retaliation protections and requires casinos to provide health insurance subsidies.',
+    keyProvisions: [
+      'Gaming worker minimum wage: $18/hour for tipped positions, $22/hour for non-tipped',
+      'Layoff protection: 30-day notice requirement for workforce reductions over 25 employees',
+      'Severance guarantee: 2 weeks pay per year of service for involuntary termination',
+      'Portable benefits: Health insurance and retirement benefits transfer between employers',
+      'Safety committees: Mandatory worker representation in casino safety oversight'
+    ]
   },
   {
     id: 7,
@@ -218,7 +266,15 @@ const sampleLegislation = [
     timeline: '3-6 months',
     confidence: 85,
     isBenefit: true,
-    description: 'Provides up to $5,000 in state tax credits for homeowners installing solar panels in Nevada.'
+    description: 'Provides up to $5,000 in state tax credits for homeowners installing solar panels in Nevada.',
+    summary: 'This Nevada state bill creates a residential solar tax credit program. Key provisions: (1) Up to $5,000 state tax credit for solar panel installations, (2) Credit amount equals 25% of installation costs up to maximum, (3) Requires certified Nevada solar contractors for eligibility, (4) System must meet minimum 5kW capacity requirement, (5) Credit can be carried forward up to 5 years if it exceeds annual tax liability. The bill also establishes net metering protections and requires utility companies to maintain current buyback rates for solar energy production.',
+    keyProvisions: [
+      'Tax credit: 25% of installation costs up to $5,000 maximum per residence',
+      'System requirements: Minimum 5kW capacity, certified Nevada contractor installation',
+      'Carryforward provision: Unused credits can be applied for up to 5 years',
+      'Net metering protection: Utilities must maintain current solar buyback rates',
+      'Statewide cap: $50 million annual program limit, first-come first-served basis'
+    ]
   },
 
   // Las Vegas Local
@@ -234,7 +290,15 @@ const sampleLegislation = [
     timeline: '1-3 months',
     confidence: 90,
     isBenefit: true,
-    description: 'Expands RTC bus service with veteran discounts and new routes to Henderson and Summerlin.'
+    description: 'Expands RTC bus service with veteran discounts and new routes to Henderson and Summerlin.',
+    summary: 'This Las Vegas ordinance expands Regional Transportation Commission (RTC) bus service throughout the valley. Key provisions: (1) 12 new bus routes connecting downtown Las Vegas to Henderson, Summerlin, and North Las Vegas, (2) Reduced fares for veterans (50% discount) and seniors 65+ (free rides), (3) Extended service hours until 1 AM on weekends, (4) New express routes to McCarran Airport and UNLV campus, (5) Electric bus fleet conversion for 30% of routes by 2026. The expansion includes new bus stops and improved accessibility features.',
+    keyProvisions: [
+      'Route expansion: 12 new routes connecting major valley destinations',
+      'Veteran benefits: 50% fare discount for military veterans with ID',
+      'Senior benefits: Free rides for residents 65 and older',
+      'Extended hours: Weekend service until 1 AM on major routes',
+      'Electric fleet: 30% of buses converted to electric by 2026'
+    ]
   },
   {
     id: 9,
@@ -248,7 +312,15 @@ const sampleLegislation = [
     timeline: '6-12 months',
     confidence: 60,
     isBenefit: false,
-    description: 'Proposed 3% increase in Clark County property tax rates to fund education and public safety.'
+    description: 'Proposed 3% increase in Clark County property tax rates to fund education and public safety.',
+    summary: 'This Clark County ordinance increases property tax rates to fund essential services. Key provisions: (1) 3% increase in property tax rate from current $3.66 to $3.77 per $100 assessed value, (2) Revenue allocation: 60% to Clark County School District, 40% to police and fire services, (3) Homestead exemption increased from $3,000 to $5,000 for primary residences, (4) Senior citizen freeze for residents over 65 with income under $50,000, (5) First-time homebuyer exemption for properties under $300,000. The measure requires voter approval in November 2024.',
+    keyProvisions: [
+      'Tax rate increase: 3% increase from $3.66 to $3.77 per $100 assessed value',
+      'Revenue split: 60% education funding, 40% public safety services',
+      'Homestead exemption: Increased from $3,000 to $5,000 for primary residences',
+      'Senior protection: Tax freeze for 65+ residents earning under $50,000 annually',
+      'First-time buyer relief: Exemption for homes under $300,000 purchase price'
+    ]
   },
 
   // Menifee Local Example
@@ -264,7 +336,15 @@ const sampleLegislation = [
     timeline: '6-12 months',
     confidence: 75,
     isBenefit: false,
-    description: 'Proposes $3,000 impact fee on new residential construction to fund parks and road improvements in Menifee.'
+    description: 'Proposes $3,000 impact fee on new residential construction to fund parks and road improvements in Menifee.',
+    summary: 'This Menifee city ordinance establishes development impact fees for new residential construction. Key provisions: (1) $3,000 per unit fee for single-family homes, $2,000 for condos/townhomes, (2) Revenue allocation: 50% parks and recreation, 30% road improvements, 20% public safety facilities, (3) Fee waiver for affordable housing developments under 80% AMI, (4) Phased implementation over 2 years to allow developer adjustment, (5) Annual review and adjustment based on construction costs. The measure includes provisions for in-lieu improvements and fee deferrals for local builders.',
+    keyProvisions: [
+      'Impact fees: $3,000 per single-family home, $2,000 per condo/townhome',
+      'Revenue allocation: 50% parks, 30% roads, 20% public safety facilities',
+      'Affordable housing waiver: No fees for developments under 80% Area Median Income',
+      'Phased implementation: 50% of fee in Year 1, full fee in Year 2',
+      'Local builder support: Fee deferral options and in-lieu improvement credits'
+    ]
   },
 
   // Additional Categories
@@ -279,7 +359,15 @@ const sampleLegislation = [
     timeline: '12+ months',
     confidence: 40,
     isBenefit: true,
-    description: 'Federal program providing childcare vouchers and expanding Head Start programs nationwide.'
+    description: 'Federal program providing childcare vouchers and expanding Head Start programs nationwide.',
+    summary: 'This federal bill establishes universal childcare support for American families. Key provisions: (1) Childcare vouchers up to $400/month per child for families earning under 200% Federal Poverty Level, (2) Sliding scale assistance for families earning 200-400% FPL, (3) Expansion of Head Start programs to serve 500,000 additional children, (4) Quality standards requiring bachelor\'s degrees for lead teachers, (5) $75 billion annual funding through corporate tax adjustments. The bill includes provisions for rural childcare access and support for family childcare providers.',
+    keyProvisions: [
+      'Childcare vouchers: Up to $400/month per child for families under 200% FPL',
+      'Sliding scale support: Reduced assistance for families earning 200-400% FPL',
+      'Head Start expansion: 500,000 additional slots in early childhood programs',
+      'Quality requirements: Bachelor\'s degree requirement for lead childcare teachers',
+      'Rural access: Special funding for childcare deserts in rural communities'
+    ]
   },
   {
     id: 12,
@@ -292,7 +380,15 @@ const sampleLegislation = [
     timeline: '12+ months',
     confidence: 65,
     isBenefit: true,
-    description: 'Invests $50 billion in climate resilience infrastructure including flood protection and wildfire prevention.'
+    description: 'Invests $50 billion in climate resilience infrastructure including flood protection and wildfire prevention.',
+    summary: 'This federal bill invests in climate adaptation and resilience infrastructure nationwide. Key provisions: (1) $50 billion over 5 years for climate resilience projects, (2) Flood protection systems for 100 high-risk communities, (3) Wildfire prevention through forest management and defensible space programs, (4) Drought-resistant water infrastructure and storage systems, (5) Climate-resilient transportation and energy grid upgrades. The bill prioritizes disadvantaged communities and includes job training programs for green infrastructure workers.',
+    keyProvisions: [
+      'Total investment: $50 billion over 5 years for climate resilience infrastructure',
+      'Flood protection: Levees, seawalls, and drainage systems for 100 at-risk communities',
+      'Wildfire prevention: Forest thinning, controlled burns, and defensible space programs',
+      'Water infrastructure: Drought-resistant systems and emergency water storage',
+      'Priority communities: 40% of funding reserved for disadvantaged areas'
+    ]
   }
 ];
 

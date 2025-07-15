@@ -15,6 +15,16 @@ Description: ${legislation.description || 'No description provided'}
 Bill Number: ${legislation.billNumber || 'Not provided'}
 Congress Session: ${legislation.congress || 'Not provided'}
 
+${legislation.summary ? `
+DETAILED BILL SUMMARY:
+${legislation.summary}
+` : ''}
+
+${legislation.keyProvisions ? `
+KEY PROVISIONS:
+${legislation.keyProvisions.map(provision => `• ${provision}`).join('\n')}
+` : ''}
+
 CRITICAL INSTRUCTIONS:
 - If the status is "Passed" or "Signed into law", acknowledge this has already been enacted
 - If only a title and brief description are provided, state that detailed analysis requires the full bill text
