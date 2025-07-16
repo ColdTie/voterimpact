@@ -216,7 +216,7 @@ class UniversalDataSources {
       sourceUrl: `https://www.congress.gov/bill/${bill.congress}th-congress/${bill.originChamber}-bill/${bill.number.split('.')[1]}`,
       lastUpdated: bill.updateDate,
       // Add default financial data to prevent NaN
-      personalImpact: 'Impact analysis pending - please refresh AI analysis for details.',
+      personalImpact: 'Pending',
       financialEffect: 0,
       timeline: 'Unknown',
       confidence: 50,
@@ -241,7 +241,7 @@ class UniversalDataSources {
       sourceUrl: bill.sources?.[0]?.url,
       lastUpdated: bill.updated_at,
       // Add default financial data to prevent NaN
-      personalImpact: 'Impact analysis pending - please refresh AI analysis for details.',
+      personalImpact: 'Pending',
       financialEffect: 0,
       timeline: 'Unknown',
       confidence: 50,
@@ -269,7 +269,7 @@ class UniversalDataSources {
             votingOptions: contest.candidates?.map(c => c.name) || ['Yes', 'No'],
             sourceUrl: contest.sources?.[0]?.name === 'Ballot Information Project' ? contest.sources[0].url : null,
             // Add default financial data to prevent NaN
-            personalImpact: 'Impact analysis pending - please refresh AI analysis for details.',
+            personalImpact: 'Pending',
             financialEffect: 0,
             timeline: 'Unknown',
             confidence: 50,

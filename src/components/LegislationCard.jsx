@@ -8,7 +8,7 @@ import SocialShare from './SocialShare';
 import BillTracker from './BillTracker';
 import RepresentativeContact from './RepresentativeContact';
 
-const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelected = false, onSelectionChange }) => {
+const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelected = false, onSelectionChange, index = 0 }) => {
   const { userProfile } = useAuth();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -197,7 +197,7 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
   const contentTypeInfo = getContentTypeInfo(legislation.type);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mx-4 mb-4 p-4">
+    <div className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-200 mx-4 mb-6 p-4`}>
       {/* Sample Content Warning */}
       {legislation.isSampleContent && (
         <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded">
@@ -212,37 +212,17 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
         <div className="flex-1 pr-2">
           <div className="flex items-center mb-1">
             <span className="text-lg mr-2">{contentTypeInfo.icon}</span>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-base font-semibold text-gray-900">
               {title}
             </h3>
           </div>
-          <div className="flex items-center space-x-2 flex-wrap">
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-              {contentTypeInfo.label}
-            </span>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              legislation.scope === 'Federal' ? 'bg-blue-100 text-blue-800' :
-              legislation.scope === 'State' ? 'bg-purple-100 text-purple-800' :
-              legislation.scope === 'Local' || legislation.scope === 'City' ? 'bg-orange-100 text-orange-800' :
-              legislation.scope === 'County' ? 'bg-amber-100 text-amber-800' :
-              'bg-gray-100 text-gray-800'
-            }`}>
-              {legislation.scope || 'Federal'}
-            </span>
+          <div className="text-sm text-gray-600">
+            <span>{legislation.scope || 'Federal'} {contentTypeInfo.label}</span>
             {legislation.category && (
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
-                {legislation.category}
-              </span>
-            )}
-            {legislation.location && (typeof legislation.location === 'string' ? legislation.location : 
-              legislation.location.city || legislation.location.county || legislation.location.state) && (
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                {typeof legislation.location === 'string' ? legislation.location : 
-                 legislation.location.city || legislation.location.county || legislation.location.state}
-              </span>
+              <span> - {legislation.category}</span>
             )}
             {legislation.relevanceScore && (
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+              <span className="text-xs text-gray-500 ml-2">
                 {Math.round(legislation.relevanceScore)}% match
               </span>
             )}
@@ -343,127 +323,41 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
         </div>
       )}
 
-      {/* Personal Impact Section - Redesigned */}
-      <div className="bg-white border border-gray-200 rounded-lg mb-4 overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900">Personal Impact Analysis</h4>
-            </div>
-            {useAI && (
-              <div className="flex items-center space-x-2">
-                {loading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                )}
-                <button
-                  onClick={generatePersonalImpact}
-                  disabled={loading}
-                  className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  title={loading ? 'Fetching bill text for enhanced analysis...' : 'Generate detailed AI analysis'}
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                      {analysis ? 'Refresh Analysis' : 'Analyze Impact'}
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
+      {/* Personal Impact Section - Simplified Inline */}
+      <div className="bg-gray-50 border-l-4 border-blue-400 p-3 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="text-sm font-medium text-gray-900">Personal Impact Analysis</span>
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4">
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm text-red-700">{error}</span>
-              </div>
-            </div>
+          {useAI && (
+            <button
+              onClick={generatePersonalImpact}
+              disabled={loading}
+              className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              title={loading ? 'Analyzing...' : 'Refresh Analysis'}
+            >
+              {loading ? 'Analyzing...' : 'Refresh'}
+            </button>
           )}
-          
-          {/* Impact Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {/* Financial Impact Card */}
-            <div className={`p-4 rounded-lg border-2 ${
-              financialEffect > 0 
-                ? 'bg-green-50 border-green-200' 
-                : financialEffect < 0 
-                  ? 'bg-red-50 border-red-200' 
-                  : 'bg-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Financial Impact</span>
-                {financialEffect !== 0 && (
-                  <div className={`w-3 h-3 rounded-full ${
-                    financialEffect > 0 ? 'bg-green-500' : 'bg-red-500'
-                  }`}></div>
-                )}
-              </div>
-              <div className="flex items-center">
-                <span className={`text-2xl font-bold ${
-                  financialEffect > 0 ? 'text-green-700' : financialEffect < 0 ? 'text-red-700' : 'text-gray-700'
-                }`}>
-                  {formatFinancialEffect(financialEffect)}
-                </span>
-              </div>
-            </div>
-
-            {/* Timeline Card */}
-            <div className="p-4 rounded-lg border-2 bg-blue-50 border-blue-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Timeline</span>
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className="text-lg font-semibold text-blue-900">{timeline}</span>
-            </div>
-
-            {/* Confidence Card */}
-            <div className="p-4 rounded-lg border-2 bg-purple-50 border-purple-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Confidence</span>
-                <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <div className="flex items-center">
-                <div className="flex-1 mr-3">
-                  <div className="w-full bg-purple-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        confidence >= 70 ? 'bg-green-500' : 
-                        confidence >= 40 ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${confidence}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <span className="text-lg font-semibold text-purple-900">{confidence}%</span>
-              </div>
-            </div>
-          </div>
+        </div>
+        
+        {error && (
+          <div className="text-xs text-red-600 mb-2">{error}</div>
+        )}
+        
+        <div className="text-sm text-gray-700">
+          <span className="font-medium">Financial Impact:</span> 
+          <span className={`mx-2 ${
+            financialEffect > 0 ? 'text-green-600' : financialEffect < 0 ? 'text-red-600' : 'text-gray-600'
+          }`}>
+            {formatFinancialEffect(financialEffect)}
+          </span>
+          <span className="text-gray-400">|</span>
+          <span className="font-medium ml-2">Timeline:</span> 
+          <span className="ml-2 text-gray-600">{timeline || '--'}</span>
         </div>
       </div>
 
@@ -547,72 +441,64 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
             </div>
           )}
           
-          {/* Action Buttons - Mobile Optimized */}
-          <div className="pt-4 border-t border-gray-200">
-            {/* Primary Actions - Stack vertically on mobile for better touch targets */}
-            <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-3 mb-4">
-              <button
-                onClick={() => setShowBillTracker(true)}
-                className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors min-h-[44px] active:bg-blue-800"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5-5-5h5V7h5l-5-5-5 5h5v10z" />
-                </svg>
-                Track Bill
-              </button>
-              <button
-                onClick={() => setShowRepContact(true)}
-                className="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors min-h-[44px] active:bg-green-800"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                Contact Rep
-              </button>
-              <button
-                onClick={() => setShowSocialShare(true)}
-                className="w-full flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors min-h-[44px] active:bg-purple-800"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                Share
-              </button>
-              <button
-                onClick={() => {
-                  const printContent = `
-                    <h2>${title}</h2>
-                    <p><strong>Status:</strong> ${status}</p>
-                    <p><strong>Category:</strong> ${legislation.category}</p>
-                    <p><strong>Scope:</strong> ${legislation.scope}</p>
-                    ${legislation.location ? `<p><strong>Location:</strong> ${legislation.location}</p>` : ''}
-                    <h3>Personal Impact Analysis</h3>
-                    <p>${personalImpact}</p>
-                    <p><strong>Financial Effect:</strong> ${formatFinancialEffect(financialEffect)}</p>
-                    <p><strong>Timeline:</strong> ${timeline}</p>
-                    <p><strong>Confidence:</strong> ${confidence}%</p>
-                    <hr>
-                    <p><em>Generated by VoterImpact - Personalized Legislative Analysis</em></p>
-                  `;
-                  const printWindow = window.open('', '_blank');
-                  printWindow.document.write(`
-                    <html>
-                      <head><title>Legislative Analysis - ${title}</title></head>
-                      <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                        ${printContent}
-                      </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
-                  printWindow.print();
-                }}
-                className="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors min-h-[44px] active:bg-gray-800"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export
-              </button>
+          {/* Action Buttons - Streamlined */}
+          <div className="pt-3 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setShowBillTracker(true)}
+                  className="px-3 py-2 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Track Bill"
+                >
+                  📌 Track
+                </button>
+                <button
+                  onClick={() => setShowRepContact(true)}
+                  className="px-3 py-2 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Contact Representative"
+                >
+                  📞 Contact
+                </button>
+                <button
+                  onClick={() => setShowSocialShare(true)}
+                  className="px-3 py-2 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Share"
+                >
+                  🔗 Share
+                </button>
+                <button
+                  onClick={() => {
+                    const printContent = `
+                      <h2>${title}</h2>
+                      <p><strong>Status:</strong> ${status}</p>
+                      <p><strong>Category:</strong> ${legislation.category}</p>
+                      <p><strong>Scope:</strong> ${legislation.scope}</p>
+                      ${legislation.location ? `<p><strong>Location:</strong> ${legislation.location}</p>` : ''}
+                      <h3>Personal Impact Analysis</h3>
+                      <p>${personalImpact}</p>
+                      <p><strong>Financial Effect:</strong> ${formatFinancialEffect(financialEffect)}</p>
+                      <p><strong>Timeline:</strong> ${timeline}</p>
+                      <hr>
+                      <p><em>Generated by VoterImpact - Personalized Legislative Analysis</em></p>
+                    `;
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`
+                      <html>
+                        <head><title>Legislative Analysis - ${title}</title></head>
+                        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                          ${printContent}
+                        </body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.print();
+                  }}
+                  className="px-3 py-2 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Export"
+                >
+                  📄 Export
+                </button>
+              </div>
             </div>
             
             {/* Last Updated */}

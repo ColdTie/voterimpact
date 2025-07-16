@@ -83,6 +83,7 @@ function MainApp() {
   const [useAI, setUseAI] = useState(false);
   const [selectedBills, setSelectedBills] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(5);
 
   // Use live legislation data instead of hardcoded bills
   const { 
@@ -667,32 +668,32 @@ function MainApp() {
           
           {!representativesLoading && userRepresentatives.length > 0 && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {userRepresentatives.map((rep) => (
-                  <div key={rep.id} className="bg-gray-50 rounded-lg p-3">
-                    <PoliticianCard 
-                      politician={rep} 
-                      size="medium" 
-                      showVotingRecord={false}
-                    />
-                    {rep.note && (
-                      <div className="mt-2 text-xs text-gray-600 italic">
-                        {rep.note}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  {userRepresentatives.map((rep) => (
+                    <div key={rep.id} className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900">{rep.name}</div>
+                        <div className="text-gray-600">{rep.position} ({rep.party?.charAt(0) || 'I'})</div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      {rep.website && (
+                        <a 
+                          href={rep.website} 
+                          target="_blank" 
+                          rel="noopener,noreferrer"
+                          className="text-blue-600 hover:text-blue-800 text-xs"
+                        >
+                          Contact
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
               
-              {userRepresentatives.some(rep => rep.source === 'google-civic') && (
-                <div className="mt-2 text-xs text-gray-500 text-center">
-                  ✓ Current representatives from official sources
-                </div>
-              )}
-              
               {userRepresentatives.some(rep => rep.source === 'fallback') && (
-                <div className="mt-2 text-xs text-yellow-600 text-center">
-                  ⚠ Using fallback data. For most current info, visit official government sites.
+                <div className="mt-2 text-xs text-gray-500 text-center">
+                  ⓘ Using sample data. Visit official sites for current info.
                 </div>
               )}
             </>
@@ -730,7 +731,17 @@ function MainApp() {
         onScopeChange={setActiveScope}
       />
       <main className="pb-6">
-        {filteredLegislation.map((legislation) => (
+        {/* Bill count indicator */}
+        {filteredLegislation.length > 0 && (
+          <div className="px-4 mb-4">
+            <p className="text-sm text-gray-600">
+              Showing {Math.min(displayLimit, filteredLegislation.length)} of {filteredLegislation.length} bills
+            </p>
+          </div>
+        )}
+        
+        {/* Display limited bills */}
+        {filteredLegislation.slice(0, displayLimit).map((legislation, index) => (
           <LegislationCard 
             key={legislation.id} 
             legislation={legislation} 
@@ -738,8 +749,22 @@ function MainApp() {
             useAI={useAI}
             isSelected={selectedBills.some(b => b.id === legislation.id)}
             onSelectionChange={(isSelected) => handleBillSelection(legislation, isSelected)}
+            index={index}
           />
         ))}
+        
+        {/* Load More button */}
+        {filteredLegislation.length > displayLimit && (
+          <div className="text-center px-4 py-6">
+            <button
+              onClick={() => setDisplayLimit(prev => prev + 5)}
+              className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Load More Bills ({filteredLegislation.length - displayLimit} remaining)
+            </button>
+          </div>
+        )}
+        
         {filteredLegislation.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">No legislation found for this category.</p>
