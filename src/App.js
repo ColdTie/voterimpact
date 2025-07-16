@@ -643,21 +643,25 @@ function MainApp() {
           {representativesLoading && (
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span className="ml-2 text-sm text-gray-600">Loading your representatives...</span>
+              <span className="ml-2 text-sm text-gray-600">Finding your representatives...</span>
             </div>
           )}
           
           {representativesError && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
-              <div className="text-sm text-yellow-800">
-                <strong>Note:</strong> Unable to fetch current representatives. Please visit{' '}
-                <a href="https://www.house.gov/representatives/find-your-representative" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   className="underline">
-                  house.gov
-                </a> to find your representatives.
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-3">
+              <div className="text-sm text-yellow-800 mb-3">
+                <strong>Unable to load representatives automatically</strong>
+                <p className="mt-1">We couldn't fetch your representatives from our data sources. Please use the button below to find them on the official government website.</p>
               </div>
+              <button
+                onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Find My Representatives
+              </button>
             </div>
           )}
           
@@ -695,17 +699,23 @@ function MainApp() {
           )}
           
           {!representativesLoading && !representativesError && userRepresentatives.length === 0 && (
-            <div className="text-center py-4 text-gray-600">
-              <p className="text-sm">No representatives found for your location.</p>
-              <p className="text-xs mt-1">
-                Visit{' '}
-                <a href="https://www.house.gov/representatives/find-your-representative" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   className="text-blue-600 underline">
-                  house.gov
-                </a> to find your representatives.
-              </p>
+            <div className="text-center py-6 text-gray-600">
+              <div className="mb-4">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.5a8.25 8.25 0 0116.5 0" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-900 mb-1">No representatives found</p>
+              <p className="text-sm text-gray-500 mb-4">We couldn't locate representatives for your specific address.</p>
+              <button
+                onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Find My Representatives
+              </button>
             </div>
           )}
         </div>

@@ -137,20 +137,20 @@ class RepresentativeService {
     // Get senators for the state (this would ideally be a comprehensive database)
     const senators = this.getFallbackSenatorsForState(state, stateFullName);
     
-    // Add generic House representative
+    // Add district-specific House representative placeholder
     const houseRep = {
       id: `${state.toLowerCase()}-house-fallback`,
-      name: `${stateFullName} House Representative`,
+      name: `Your House Representative`,
       title: 'Representative',
       position: 'Representative',
       party: 'Varies by District',
       state: stateFullName,
-      office: 'U.S. House',
+      office: 'U.S. House of Representatives',
       photo_url: null,
       photo: null,
       website: 'https://www.house.gov/representatives/find-your-representative',
       source: 'fallback',
-      note: 'Exact representative depends on your specific district. Click to find your representative on house.gov.'
+      note: 'Your specific representative depends on your congressional district. Click "Find My Representatives" to locate them.'
     };
 
     return [...senators, houseRep];
