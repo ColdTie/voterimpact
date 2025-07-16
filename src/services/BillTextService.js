@@ -16,42 +16,59 @@ class BillTextService {
       return cached.data;
     }
 
+    // Always enhance with available data first
+    const enhancedLegislation = this.enhanceLegislationWithoutText(legislation);
+
     try {
-      // For federal bills, try to fetch full text
+      // For federal bills, try to fetch full text (but don't block on it)
       if (legislation.scope === 'Federal' && legislation.congress && legislation.billNumber) {
         const billType = this.extractBillType(legislation.billNumber);
         const billNumber = this.extractBillNumber(legislation.billNumber);
         
         if (billType && billNumber) {
-          const textVersions = await CongressService.getBillText(
-            legislation.congress,
-            billType,
-            billNumber
-          );
+          // Only attempt if we have a real API key (not DEMO_KEY)
+          const apiKey = process.env.REACT_APP_CONGRESS_API_KEY;
+          if (apiKey && apiKey !== 'DEMO_KEY') {
+            try {
+              const textVersions = await CongressService.getBillText(
+                legislation.congress,
+                billType,
+                billNumber
+              );
 
-          if (textVersions && textVersions.length > 0) {
-            const enhancedLegislation = await this.enhanceLegislationWithText(
-              legislation,
-              textVersions
-            );
-            
-            // Cache the result
-            this.cache.set(cacheKey, {
-              data: enhancedLegislation,
-              timestamp: Date.now()
-            });
-            
-            return enhancedLegislation;
+              if (textVersions && textVersions.length > 0) {
+                const textEnhanced = await this.enhanceLegislationWithText(
+                  legislation,
+                  textVersions
+                );
+                
+                // Cache the result
+                this.cache.set(cacheKey, {
+                  data: textEnhanced,
+                  timestamp: Date.now()
+                });
+                
+                return textEnhanced;
+              }
+            } catch (textError) {
+              // Log but don't fail - continue with enhanced data
+              console.warn(`Bill text fetch failed for ${legislation.billNumber}:`, textError.message);
+            }
           }
         }
       }
 
-      // If we can't fetch text, enhance with available data
-      return this.enhanceLegislationWithoutText(legislation);
+      // Cache the enhanced (but not full-text) result
+      this.cache.set(cacheKey, {
+        data: enhancedLegislation,
+        timestamp: Date.now()
+      });
+      
+      return enhancedLegislation;
       
     } catch (error) {
-      console.warn('Failed to fetch bill text:', error);
-      return this.enhanceLegislationWithoutText(legislation);
+      console.warn('Error in getEnhancedBillData:', error);
+      return enhancedLegislation; // Return the basic enhanced version
     }
   }
 
@@ -287,26 +304,116 @@ class BillTextService {
   generateEnhancedSummary(legislation) {
     let enhanced = legislation.summary || legislation.description || '';
 
-    // Add context based on bill number and congress
+    // Add bill context and metadata
     if (legislation.billNumber && legislation.congress) {
-      enhanced += `\n\nThis is ${legislation.billNumber} from the ${legislation.congress}th Congress.`;
-    }
-
-    // Add status context
-    if (legislation.status) {
-      enhanced += ` Current status: ${legislation.status}.`;
+      enhanced += `\n\nBILL DETAILS:\n`;
+      enhanced += `- Bill Number: ${legislation.billNumber}\n`;
+      enhanced += `- Congress: ${legislation.congress}th Congress\n`;
+      enhanced += `- Chamber: ${legislation.chamber || 'Not specified'}\n`;
+      enhanced += `- Category: ${legislation.category || 'Not specified'}\n`;
+      enhanced += `- Status: ${legislation.status || 'Unknown'}\n`;
     }
 
     // Add sponsor information if available
     if (legislation.sponsor?.name) {
-      enhanced += ` Sponsored by ${legislation.sponsor.name}`;
+      enhanced += `\nSPONSOR INFORMATION:\n`;
+      enhanced += `- Primary Sponsor: ${legislation.sponsor.name}`;
       if (legislation.sponsor.party && legislation.sponsor.state) {
         enhanced += ` (${legislation.sponsor.party}-${legislation.sponsor.state})`;
       }
-      enhanced += '.';
+      enhanced += '\n';
     }
 
+    // Add timeline information
+    if (legislation.introducedDate || legislation.lastActionDate) {
+      enhanced += `\nTIMELINE:\n`;
+      if (legislation.introducedDate) {
+        enhanced += `- Introduced: ${legislation.introducedDate}\n`;
+      }
+      if (legislation.lastActionDate && legislation.lastAction) {
+        enhanced += `- Last Action: ${legislation.lastAction} (${legislation.lastActionDate})\n`;
+      }
+    }
+
+    // Add voting record if available
+    if (legislation.votingRecord) {
+      enhanced += `\nLEGISLATIVE PROGRESS:\n`;
+      if (legislation.votingRecord.committee) {
+        const comm = legislation.votingRecord.committee;
+        enhanced += `- Committee Vote: ${comm.yes} yes, ${comm.no} no`;
+        if (comm.abstain > 0) enhanced += `, ${comm.abstain} abstain`;
+        enhanced += '\n';
+      }
+      if (legislation.votingRecord.house) {
+        const house = legislation.votingRecord.house;
+        enhanced += `- House Vote: ${house.yes} yes, ${house.no} no`;
+        if (house.abstain > 0) enhanced += `, ${house.abstain} abstain`;
+        enhanced += '\n';
+      }
+      if (legislation.votingRecord.senate) {
+        const senate = legislation.votingRecord.senate;
+        enhanced += `- Senate Vote: ${senate.yes} yes, ${senate.no} no`;
+        if (senate.abstain > 0) enhanced += `, ${senate.abstain} abstain`;
+        enhanced += '\n';
+      }
+    }
+
+    // Add bill analysis based on title/category
+    enhanced += this.generateBillAnalysisFromTitle(legislation);
+
+    // Add data availability note
+    enhanced += `\nDATA AVAILABILITY NOTE:\n`;
+    enhanced += `Full bill text was not available through the Congress.gov API (using DEMO_KEY). `;
+    enhanced += `Analysis is based on available bill summary, metadata, and sponsor information. `;
+    enhanced += `For more detailed analysis, the complete bill text would be needed.`;
+
     return enhanced.trim();
+  }
+
+  // Generate additional context based on bill title and category
+  generateBillAnalysisFromTitle(legislation) {
+    let analysis = `\nBILL CONTEXT ANALYSIS:\n`;
+    
+    const title = (legislation.title || '').toLowerCase();
+    const category = (legislation.category || '').toLowerCase();
+
+    // Provide context based on common bill patterns
+    if (title.includes('tax') || title.includes('credit')) {
+      analysis += `- This appears to be tax-related legislation that could affect taxpayer obligations or benefits.\n`;
+    }
+    
+    if (title.includes('act') && title.includes('amend')) {
+      analysis += `- This bill appears to amend existing legislation rather than create new programs.\n`;
+    }
+    
+    if (title.includes('protect') || title.includes('prevent')) {
+      analysis += `- This appears to be protective/preventive legislation addressing specific harms or risks.\n`;
+    }
+    
+    if (title.includes('veteran') || category.includes('veteran')) {
+      analysis += `- This legislation specifically affects veterans and their benefits or services.\n`;
+    }
+    
+    if (title.includes('worker') || title.includes('employment')) {
+      analysis += `- This bill appears to affect workplace rights, employment, or labor issues.\n`;
+    }
+    
+    if (title.includes('healthcare') || title.includes('health')) {
+      analysis += `- This legislation relates to healthcare policy, access, or medical services.\n`;
+    }
+
+    if (title.includes('assault weapon') || title.includes('firearm')) {
+      analysis += `- This bill addresses firearms regulations and Second Amendment issues.\n`;
+    }
+
+    // Add status-specific context
+    if (legislation.status === 'Introduced') {
+      analysis += `- As an introduced bill, this is in early stages and may undergo significant changes.\n`;
+    } else if (legislation.status === 'Passed') {
+      analysis += `- This bill has passed and its provisions are already in effect or implementation.\n`;
+    }
+
+    return analysis;
   }
 
   // Clear cache
