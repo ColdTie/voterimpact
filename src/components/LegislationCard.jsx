@@ -389,33 +389,11 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
       </div>
 
       {/* Content-specific details */}
-      {legislation.type === ContentTypes.BALLOT_MEASURE && legislation.votingOptions && (
+      {legislation.type === ContentTypes.BALLOT_MEASURE && legislation.electionDate && (
         <div className="bg-amber-50 rounded-lg p-3 mb-3">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Voting Options</h4>
-          <div className="flex space-x-2">
-            {legislation.votingOptions.map((option, index) => (
-              <button 
-                key={index} 
-                className="px-3 py-2 bg-white border border-amber-200 rounded text-xs hover:bg-amber-100 transition-colors cursor-pointer"
-                onClick={() => {
-                  // For sample content, show info modal
-                  if (legislation.id?.toString().includes('generic') || !legislation.sourceUrl) {
-                    alert(`This is sample content for demonstration. In a real election, clicking "${option}" would record your vote preference and provide information about the voting process.`);
-                  } else {
-                    // For real content, could integrate with voting registration systems
-                    alert(`Learn more about voting "${option}" on this measure. This would link to official voting information.`);
-                  }
-                }}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          {legislation.electionDate && (
-            <p className="text-xs text-amber-700 mt-2">
-              Election Date: {new Date(legislation.electionDate).toLocaleDateString()}
-            </p>
-          )}
+          <p className="text-xs text-amber-700">
+            <strong>Election Date:</strong> {new Date(legislation.electionDate).toLocaleDateString()}
+          </p>
           {(!legislation.sourceUrl && !legislation.billNumber) && (
             <div className="mt-2 p-2 bg-orange-100 border border-orange-200 rounded">
               <p className="text-xs text-orange-800">
