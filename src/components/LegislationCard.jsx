@@ -30,9 +30,19 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
   // Use AI analysis if available, otherwise fall back to defaults
   const personalImpact = analysis?.personalImpact || defaultPersonalImpact;
   const timeline = analysis?.timeline || defaultTimeline;
-  const confidence = analysis?.confidence || defaultConfidence;
   const financialEffect = analysis?.financialEffect || defaultFinancialEffect;
   const isBenefit = analysis?.isBenefit !== undefined ? analysis.isBenefit : defaultIsBenefit;
+  
+  // Adjust confidence based on analysis certainty
+  let confidence = analysis?.confidence || defaultConfidence;
+  if (personalImpact && (
+    personalImpact.toLowerCase().includes('cannot determine') ||
+    personalImpact.toLowerCase().includes('unable to determine') ||
+    personalImpact.toLowerCase().includes('without full text') ||
+    personalImpact.toLowerCase().includes('insufficient information')
+  )) {
+    confidence = Math.min(confidence, 15); // Cap at 15% for uncertain analysis
+  }
 
   useEffect(() => {
     if (useAI && userProfile && !analysis && !loading) {
@@ -334,7 +344,7 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
       )}
 
       {/* Personal Impact Section - Redesigned */}
-      <div className="bg-white border border-gray-200 rounded-lg mb-3 overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg mb-4 overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -416,13 +426,6 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
                 }`}>
                   {formatFinancialEffect(financialEffect)}
                 </span>
-                {financialEffect !== 0 && (
-                  <span className={`ml-2 text-xs font-medium ${
-                    financialEffect > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {financialEffect > 0 ? 'benefit' : 'cost'}
-                  </span>
-                )}
               </div>
             </div>
 
@@ -612,27 +615,14 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
               </button>
             </div>
             
-            {/* Impact Summary */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 pt-3 border-t border-gray-100">
-              <div className="flex items-center">
-                <span className="text-sm text-gray-500 mr-2">Overall Impact:</span>
-                <div className="flex items-center">
-                  <div className={`w-3 h-3 rounded-full mr-2 ${
-                    financialEffect > 0 ? 'bg-green-500' : financialEffect < 0 ? 'bg-red-500' : 'bg-gray-400'
-                  }`}></div>
-                  <span className={`text-sm font-medium ${
-                    financialEffect >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {isBenefit ? 'Potential Benefit' : isBenefit === false ? 'Potential Cost' : 'Impact Unknown'}
-                  </span>
-                </div>
-              </div>
-              {legislation.lastActionDate && (
+            {/* Last Updated */}
+            {legislation.lastActionDate && (
+              <div className="flex justify-end pt-3 border-t border-gray-100">
                 <span className="text-xs text-gray-400">
                   Updated: {new Date(legislation.lastActionDate).toLocaleDateString()}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}

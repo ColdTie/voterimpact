@@ -699,23 +699,25 @@ function MainApp() {
           )}
           
           {!representativesLoading && !representativesError && userRepresentatives.length === 0 && (
-            <div className="text-center py-6 text-gray-600">
-              <div className="mb-4">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.5a8.25 8.25 0 0116.5 0" />
-                </svg>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 cursor-pointer hover:bg-blue-100 transition-colors"
+                 onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}>
+              <div className="text-center">
+                <div className="mb-4">
+                  <svg className="mx-auto h-12 w-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.5a8.25 8.25 0 0116.5 0" />
+                  </svg>
+                </div>
+                <p className="text-lg font-semibold text-gray-900 mb-2">House Representative</p>
+                <p className="text-sm text-gray-700 mb-4">We need your exact address to identify your House Representative</p>
+                <button
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Find My Representative
+                </button>
               </div>
-              <p className="text-sm font-medium text-gray-900 mb-1">No representatives found</p>
-              <p className="text-sm text-gray-500 mb-4">We couldn't locate representatives for your specific address.</p>
-              <button
-                onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                Find My Representatives
-              </button>
             </div>
           )}
         </div>
