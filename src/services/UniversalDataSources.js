@@ -286,9 +286,21 @@ class UniversalDataSources {
   parseLocation(location) {
     if (!location) return {};
     const parts = location.split(',').map(p => p.trim());
+    const city = parts[0];
+    const stateOrCode = parts[1];
+    
+    // Check if it's already a state code (2 letters)
+    if (stateOrCode && stateOrCode.length === 2) {
+      return {
+        city: city,
+        state: this.getStateNameFromCode(stateOrCode.toUpperCase()),
+        stateCode: stateOrCode.toUpperCase()
+      };
+    }
+    
     return {
-      city: parts[0],
-      state: parts[1]
+      city: city,
+      state: stateOrCode
     };
   }
 
@@ -470,14 +482,14 @@ class UniversalDataSources {
   // Main entry point - get all relevant content for any location
   async getAllContent(userLocation, userProfile = {}) {
     const results = [];
-    const { state } = this.parseLocation(userLocation);
-    const stateCode = this.getStateCode(state);
+    const { state, stateCode } = this.parseLocation(userLocation);
+    const finalStateCode = stateCode || this.getStateCode(state);
 
     try {
       // Fetch all data sources in parallel
       const [federalBills, stateBills, localContent] = await Promise.allSettled([
         this.getFederalBills(6),
-        stateCode ? this.getStateBills(stateCode, 4) : Promise.resolve([]),
+        finalStateCode ? this.getStateBills(finalStateCode, 4) : Promise.resolve([]),
         this.getLocalContent(userLocation)
       ]);
 
