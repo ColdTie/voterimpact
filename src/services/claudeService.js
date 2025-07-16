@@ -27,7 +27,7 @@ ${legislation.keyProvisions.map(provision => `• ${provision}`).join('\n')}
 
 ${legislation.fullTextExcerpts ? `
 ACTUAL BILL TEXT EXCERPTS:
-${legislation.fullTextExcerpts.impactSections ? `
+${legislation.fullTextExcerpts.impactSections && legislation.fullTextExcerpts.impactSections.length > 0 ? `
 Impact Sections:
 ${legislation.fullTextExcerpts.impactSections.map(section => `"${section}"`).join('\n\n')}
 ` : ''}
@@ -41,6 +41,11 @@ ${legislation.fullTextExcerpts.financialImpact ? `
 Financial Impact Details:
 "${legislation.fullTextExcerpts.financialImpact}"
 ` : ''}
+` : legislation.enhancedSummary ? `
+ENHANCED BILL INFORMATION:
+${legislation.enhancedSummary}
+
+NOTE: Full bill text was not available. Analysis based on available summary and metadata.
 ` : 'WARNING: No actual bill text available - analysis will be limited to summary information only.'}
 
 CRITICAL INSTRUCTIONS:

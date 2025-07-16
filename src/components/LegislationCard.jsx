@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { analyzePersonalImpact } from '../services/claudeService';
+import BillTextService from '../services/BillTextService';
 import { ContentTypes } from '../types/contentTypes';
 import PoliticianCard from './PoliticianCard';
 import SocialShare from './SocialShare';
@@ -46,7 +47,11 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
     setError(null);
     
     try {
-      const result = await analyzePersonalImpact(legislation, userProfile);
+      // First, try to get enhanced bill data with full text
+      const enhancedLegislation = await BillTextService.getEnhancedBillData(legislation);
+      
+      // Use enhanced data for AI analysis
+      const result = await analyzePersonalImpact(enhancedLegislation, userProfile);
       
       if (result.success) {
         setAnalysis(result.data);
@@ -340,8 +345,9 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
                 onClick={generatePersonalImpact}
                 disabled={loading}
                 className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                title={loading ? 'Fetching bill text for enhanced analysis...' : 'Generate detailed AI analysis'}
               >
-                {analysis ? 'Refresh AI Analysis' : 'Generate AI Analysis'}
+                {loading ? 'Enhancing Data...' : analysis ? 'Refresh AI Analysis' : 'Generate AI Analysis'}
               </button>
             </div>
           )}
