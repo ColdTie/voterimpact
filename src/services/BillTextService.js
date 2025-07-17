@@ -28,7 +28,7 @@ class BillTextService {
         if (billType && billNumber) {
           // Only attempt if we have a real API key (not DEMO_KEY)
           const apiKey = process.env.REACT_APP_CONGRESS_API_KEY;
-          if (apiKey && apiKey !== 'DEMO_KEY') {
+          if (apiKey && apiKey !== 'DEMO_KEY' && apiKey !== 'YOUR_CONGRESS_API_KEY_HERE') {
             try {
               const textVersions = await CongressService.getBillText(
                 legislation.congress,
@@ -53,6 +53,17 @@ class BillTextService {
             } catch (textError) {
               // Log but don't fail - continue with enhanced data
               console.warn(`Bill text fetch failed for ${legislation.billNumber}:`, textError.message);
+            }
+          } else {
+            // Try fallback data sources when no API key is available
+            try {
+              const fallbackData = await this.getFallbackBillData(legislation);
+              if (fallbackData) {
+                enhancedLegislation.fallbackSummary = fallbackData;
+                enhancedLegislation.dataSource = 'fallback';
+              }
+            } catch (fallbackError) {
+              console.warn('Fallback data fetch failed:', fallbackError.message);
             }
           }
         }
@@ -149,9 +160,44 @@ class BillTextService {
 
   // Fetch bill text content from Congress.gov API
   async fetchBillTextContent(textUrl) {
-    // Note: In a real implementation, this would need proper API handling
-    // For now, return a placeholder that indicates we tried but couldn't get text
-    return null;
+    try {
+      const response = await fetch(textUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'VoterImpact/1.0'
+        }
+      });
+
+      if (!response.ok) {
+        console.warn(`Failed to fetch bill text from ${textUrl}: ${response.status}`);
+        return null;
+      }
+
+      const data = await response.json();
+      
+      // Extract text content from the response
+      if (data && data.textVersions && data.textVersions.length > 0) {
+        const latestVersion = data.textVersions[0];
+        if (latestVersion.formats) {
+          // Try to get plain text format first, then formatted text
+          const textFormat = latestVersion.formats.find(f => f.type === 'Formatted Text') ||
+                            latestVersion.formats.find(f => f.type === 'PDF') ||
+                            latestVersion.formats[0];
+          
+          if (textFormat && textFormat.url) {
+            const textResponse = await fetch(textFormat.url);
+            if (textResponse.ok) {
+              return await textResponse.text();
+            }
+          }
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.warn('Error fetching bill text content:', error);
+      return null;
+    }
   }
 
   // Extract key excerpts from bill text for AI analysis
@@ -363,7 +409,13 @@ class BillTextService {
 
     // Add data availability note
     enhanced += `\nDATA AVAILABILITY NOTE:\n`;
-    enhanced += `Full bill text was not available through the Congress.gov API (using DEMO_KEY). `;
+    const apiKey = process.env.REACT_APP_CONGRESS_API_KEY;
+    if (!apiKey || apiKey === 'DEMO_KEY' || apiKey === 'YOUR_CONGRESS_API_KEY_HERE') {
+      enhanced += `Full bill text not available - Congress.gov API key not configured. `;
+      enhanced += `To get detailed bill analysis, configure REACT_APP_CONGRESS_API_KEY with a valid API key from api.congress.gov. `;
+    } else {
+      enhanced += `Full bill text was not available through the Congress.gov API. `;
+    }
     enhanced += `Analysis is based on available bill summary, metadata, and sponsor information. `;
     enhanced += `For more detailed analysis, the complete bill text would be needed.`;
 
@@ -414,6 +466,38 @@ class BillTextService {
     }
 
     return analysis;
+  }
+
+  // Get fallback bill data when Congress API is not available
+  async getFallbackBillData(legislation) {
+
+    // Generate more detailed context based on common bill patterns
+    let additionalContext = '';
+    
+    const title = (legislation.title || '').toLowerCase();
+    
+    // Add specific context based on bill type and title patterns
+    if (title.includes('rescission')) {
+      additionalContext += 'This is a rescission bill, which typically cancels or reduces previously approved government spending. Rescission bills can affect various federal programs and funding allocations. ';
+    }
+    
+    if (title.includes('epstein') || title.includes('document release')) {
+      additionalContext += 'This appears to be a transparency/disclosure bill requiring the release of government documents. Such bills typically have minimal direct financial impact on individuals but may provide increased public access to information. ';
+    }
+    
+    if (title.includes('genius') && title.includes('act')) {
+      additionalContext += 'Based on the "GENIUS Act" title, this may relate to education, innovation, or technology initiatives. Without the full text, specific provisions affecting individuals cannot be determined. ';
+    }
+    
+    if (title.includes('appropriation') || title.includes('defense')) {
+      additionalContext += 'This appears to be an appropriations bill for government spending. Such bills can affect federal programs, employee salaries, veteran benefits, and various government services. ';
+    }
+    
+    if (title.includes('digital') || title.includes('currency') || title.includes('stablecoin')) {
+      additionalContext += 'This legislation appears to regulate digital currencies or cryptocurrencies. Such bills can affect financial markets, banking regulations, and digital payment systems. ';
+    }
+
+    return additionalContext;
   }
 
   // Clear cache

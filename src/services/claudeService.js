@@ -46,7 +46,14 @@ ENHANCED BILL INFORMATION:
 ${legislation.enhancedSummary}
 
 NOTE: Full bill text was not available. Analysis based on available summary and metadata.
-` : 'WARNING: No actual bill text available - analysis will be limited to summary information only.'}
+` : ''}
+
+${legislation.fallbackSummary ? `
+ADDITIONAL CONTEXT:
+${legislation.fallbackSummary}
+` : ''}
+
+${!legislation.enhancedSummary && !legislation.fallbackSummary ? 'WARNING: No actual bill text available - analysis will be limited to summary information only.' : ''}
 
 CRITICAL INSTRUCTIONS:
 - When actual bill text excerpts are provided, use them for specific, detailed analysis
@@ -93,6 +100,14 @@ Future Goals: ${userProfile.future_goals || 'Not specified'}
 
 ANALYSIS REQUIREMENTS:
 You must be COMPLETELY HONEST about what you can and cannot determine from the limited information provided.
+
+WHEN LIMITED INFORMATION IS AVAILABLE:
+1. Focus on what can reasonably be inferred from the title, category, and any available metadata
+2. Use the bill's category, sponsor party affiliation, and status to provide context
+3. Reference similar legislation or programs when helpful for context
+4. Clearly distinguish between what is known vs. what would need the full bill text
+5. Provide general impact categories (e.g., "tax-related", "veteran benefits", "healthcare access") when specific amounts aren't available
+6. Always end with guidance on where to find more detailed information
 
 IF FULL BILL TEXT IS NOT PROVIDED:
 - Acknowledge that you only have the title and brief description
