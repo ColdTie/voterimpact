@@ -1,6 +1,8 @@
 // Service for fetching state and local legislation from OpenStates API
 // Documentation: https://docs.openstates.org/
 
+import logger from '../utils/logger';
+
 const OPENSTATES_API_KEY = process.env.REACT_APP_OPENSTATES_API_KEY;
 const OPENSTATES_API_BASE = 'https://v3.openstates.org';
 
@@ -30,7 +32,7 @@ class OpenStatesService {
     }
 
     if (!OPENSTATES_API_KEY) {
-      console.warn('OpenStates API key not configured, returning empty data');
+      logger.warn('OpenStates API key not configured, returning empty data');
       return { results: [] };
     }
 
@@ -58,7 +60,7 @@ class OpenStatesService {
 
       return data;
     } catch (error) {
-      console.error('OpenStates API fetch error:', error);
+      logger.error('OpenStates API fetch error:', error);
       return { results: [] };
     }
   }
@@ -434,7 +436,7 @@ class OpenStatesService {
       const bills = await this.getStateBills(state, options);
       return bills;
     } catch (error) {
-      console.error('Error fetching bills by location:', error);
+      logger.error('Error fetching bills by location:', error);
       return [];
     }
   }

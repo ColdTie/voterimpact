@@ -1,6 +1,8 @@
 // Smart data service that handles static vs dynamic politician data
 // Zero-breaking-change implementation with intelligent fallback
 
+import logger from '../utils/logger';
+
 class PoliticianService {
   constructor() {
     this.useRealData = process.env.REACT_APP_USE_REAL_POLITICIANS === 'true';
@@ -19,14 +21,14 @@ class PoliticianService {
       const realPoliticians = await this.getRealPoliticians(userLocation);
       
       if (realPoliticians && realPoliticians.length > 0) {
-        console.log('✅ Using real politician data from APIs');
+        logger.log('✅ Using real politician data from APIs');
         return realPoliticians;
       }
       
       throw new Error('No real politician data available');
       
     } catch (error) {
-      console.warn('⚠️ Real politician API failed, falling back to static data:', error.message);
+      logger.warn('⚠️ Real politician API failed, falling back to static data:', error.message);
       
       if (this.fallbackToStatic) {
         return this.getStaticPoliticians();

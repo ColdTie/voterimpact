@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import CongressService from '../services/CongressService';
+import logger from '../utils/logger';
 
 const BillTracker = ({ bill, onClose }) => {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ const BillTracker = ({ bill, onClose }) => {
 
       setIsTracking(!!data);
     } catch (error) {
-      console.error('Error checking tracking status:', error);
+      logger.error('Error checking tracking status:', error);
     } finally {
       setLoading(false);
     }
@@ -46,7 +47,7 @@ const BillTracker = ({ bill, onClose }) => {
         setActions(billActions);
       }
     } catch (error) {
-      console.error('Error loading bill actions:', error);
+      logger.error('Error loading bill actions:', error);
     } finally {
       setLoadingActions(false);
     }
@@ -79,7 +80,7 @@ const BillTracker = ({ bill, onClose }) => {
         setIsTracking(true);
       }
     } catch (error) {
-      console.error('Error updating tracking status:', error);
+      logger.error('Error updating tracking status:', error);
       alert('Failed to update tracking status');
     } finally {
       setLoading(false);

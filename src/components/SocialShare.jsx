@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logger from '../utils/logger';
 
 const SocialShare = ({ legislation, analysis, userProfile, onClose }) => {
   const [shareFormat, setShareFormat] = useState('summary');
@@ -69,7 +70,7 @@ ${baseUrl}`,
       try {
         await navigator.share(shareContent);
       } catch (error) {
-        console.log('Share cancelled');
+        logger.log('Share cancelled');
       }
     } else {
       navigator.clipboard.writeText(`${shareContent.title}\n\n${shareContent.text}\n\n${shareContent.url}`);

@@ -2,6 +2,7 @@
 // Uses multiple APIs: Google Civic Information API, Ballotpedia, etc.
 
 import UniversalCityDataService from './UniversalCityDataService';
+import logger from '../utils/logger';
 
 const GOOGLE_CIVIC_API_KEY = process.env.REACT_APP_GOOGLE_CIVIC_API_KEY;
 // const BALLOTPEDIA_API_KEY = process.env.REACT_APP_BALLOTPEDIA_API_KEY; // For future use
@@ -53,7 +54,7 @@ class LocalGovernmentService {
 
       return data;
     } catch (error) {
-      console.error('Local Government API fetch error:', error);
+      logger.error('Local Government API fetch error:', error);
       return { results: [], elections: [] };
     }
   }
@@ -61,7 +62,7 @@ class LocalGovernmentService {
   // Get voter information including local ballot measures using Google Civic API
   async getVoterInfo(address) {
     if (!GOOGLE_CIVIC_API_KEY) {
-      console.warn('Google Civic API key not configured');
+      logger.warn('Google Civic API key not configured');
       return { elections: [], contests: [] };
     }
 
@@ -71,7 +72,7 @@ class LocalGovernmentService {
       const data = await this.fetchFromAPI(url);
       return this.transformVoterInfoData(data);
     } catch (error) {
-      console.error('Error fetching voter info:', error);
+      logger.error('Error fetching voter info:', error);
       return { elections: [], contests: [] };
     }
   }
@@ -90,7 +91,7 @@ class LocalGovernmentService {
           elections.push(...data.elections.map(election => this.transformElectionData(election)));
         }
       } catch (error) {
-        console.error('Error fetching elections:', error);
+        logger.error('Error fetching elections:', error);
       }
     }
 
@@ -377,7 +378,7 @@ class LocalGovernmentService {
       const cityContent = await UniversalCityDataService.getContentByLocation(location);
       measures.push(...cityContent);
     } catch (error) {
-      console.error('Error fetching city content:', error);
+      logger.error('Error fetching city content:', error);
     }
     
     // Try voter info second
@@ -385,7 +386,7 @@ class LocalGovernmentService {
       const voterInfo = await this.getVoterInfo(location);
       measures.push(...voterInfo.contests);
     } catch (error) {
-      console.error('Error fetching voter info:', error);
+      logger.error('Error fetching voter info:', error);
     }
     
     // Add generic local measures as fallback

@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { analyzePersonalImpact } from '../services/claudeService';
 import BillTextService from '../services/BillTextService';
 import { ContentTypes } from '../types/contentTypes';
+import logger from '../utils/logger';
 import PoliticianCard from './PoliticianCard';
 import SocialShare from './SocialShare';
 import BillTracker from './BillTracker';
@@ -71,7 +72,7 @@ const LegislationCard = ({ legislation, politicians = [], useAI = false, isSelec
       }
     } catch (err) {
       setError('Failed to analyze personal impact');
-      console.error('Error generating personal impact:', err);
+      logger.error('Error generating personal impact:', err);
     } finally {
       setLoading(false);
     }

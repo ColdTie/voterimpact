@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 // API endpoint for backend server
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://voterimpact.vercel.app';
 
@@ -173,7 +175,7 @@ REMEMBER: Your primary duty is honesty. If you cannot provide a meaningful analy
         legislation.description === 'No description provided';
       
       if (hasDetailedClaims && hasMinimalInfo) {
-        console.warn('AI making detailed claims with insufficient bill information');
+        logger.warn('AI making detailed claims with insufficient bill information');
         data.confidence = Math.max(0, data.confidence - 30);
         data.personalImpact = `Based on limited information, this bill appears to relate to ${legislation.category || 'legislative matters'}. However, without access to the full bill text, I cannot provide specific details about financial impacts or benefits. A thorough analysis would require reviewing the complete legislative provisions.`;
         data.financialEffect = 0;
@@ -182,14 +184,14 @@ REMEMBER: Your primary duty is honesty. If you cannot provide a meaningful analy
       
       // Validate financial effect is reasonable
       if (data.financialEffect && (Math.abs(data.financialEffect) > 25000)) {
-        console.warn('AI provided large financial impact with limited information');
+        logger.warn('AI provided large financial impact with limited information');
         data.financialEffect = 0;
         data.confidence = Math.max(0, data.confidence - 20);
       }
       
       // Flag high confidence with limited information
       if (data.confidence > 60 && hasMinimalInfo) {
-        console.warn('AI showing overconfidence with limited bill information');
+        logger.warn('AI showing overconfidence with limited bill information');
         data.confidence = Math.min(40, data.confidence);
       }
       
@@ -202,7 +204,7 @@ REMEMBER: Your primary duty is honesty. If you cannot provide a meaningful analy
       if ((legislation.status === 'Passed' || legislation.status === 'Signed into law') &&
           data.personalImpact && !data.personalImpact.toLowerCase().includes('already') &&
           !data.personalImpact.toLowerCase().includes('enacted')) {
-        console.warn('AI not acknowledging bill already passed');
+        logger.warn('AI not acknowledging bill already passed');
         data.personalImpact = `This legislation has already been enacted. ${data.personalImpact}`;
       }
     }
@@ -210,7 +212,7 @@ REMEMBER: Your primary duty is honesty. If you cannot provide a meaningful analy
     return result;
     
   } catch (error) {
-    console.error('Error analyzing personal impact:', error);
+    logger.error('Error analyzing personal impact:', error);
     return {
       success: false,
       error: error.message,
@@ -249,7 +251,7 @@ export const generateLegislationSummary = async (legislationText) => {
     return result;
     
   } catch (error) {
-    console.error('Error generating legislation summary:', error);
+    logger.error('Error generating legislation summary:', error);
     return {
       success: false,
       error: error.message

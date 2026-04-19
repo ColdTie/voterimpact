@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import logger from '../utils/logger';
 
 const NotificationSettings = ({ onClose }) => {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ const NotificationSettings = ({ onClose }) => {
         setSettings(data.settings);
       }
     } catch (error) {
-      console.error('Error loading notification settings:', error);
+      logger.error('Error loading notification settings:', error);
     } finally {
       setLoading(false);
     }
@@ -62,7 +63,7 @@ const NotificationSettings = ({ onClose }) => {
         throw error;
       }
     } catch (error) {
-      console.error('Error saving settings:', error);
+      logger.error('Error saving settings:', error);
       alert('Failed to save settings. Please try again.');
     } finally {
       setSaving(false);

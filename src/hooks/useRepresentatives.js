@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import RepresentativeService from '../services/RepresentativeService';
+import logger from '../utils/logger';
 
 export const useRepresentatives = (userLocation) => {
   const [representatives, setRepresentatives] = useState([]);
@@ -26,7 +27,7 @@ export const useRepresentatives = (userLocation) => {
       setRepresentatives(reps);
       setLastLocation(location);
     } catch (err) {
-      console.error('Failed to fetch representatives:', err);
+      logger.error('Failed to fetch representatives:', err);
       setError(err.message);
       setRepresentatives([]);
     } finally {

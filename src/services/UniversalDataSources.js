@@ -1,6 +1,8 @@
 // Universal data source integration for any US location
 // Supports federal, state, and local government data
 
+import logger from '../utils/logger';
+
 class UniversalDataSources {
   constructor() {
     this.timeout = 8000; // 8 second timeout for all API calls
@@ -29,7 +31,7 @@ class UniversalDataSources {
       const data = await response.json();
       return this.transformCongressBills(data.bills || []);
     } catch (error) {
-      console.error('Federal bills fetch error:', error);
+      logger.error('Federal bills fetch error:', error);
       return [];
     }
   }
@@ -40,7 +42,7 @@ class UniversalDataSources {
       // OpenStates API
       const openStatesKey = process.env.REACT_APP_OPENSTATES_API_KEY;
       if (!openStatesKey) {
-        console.log('⚠️ No OpenStates API key found - using fallback sample state data');
+        logger.log('⚠️ No OpenStates API key found - using fallback sample state data');
         return this.generateSampleStateBills(stateCode, limit);
       }
 
@@ -51,7 +53,7 @@ class UniversalDataSources {
       });
       
       if (!response.ok) {
-        console.log(`⚠️ OpenStates API failed (${response.status}) - using sample state data`);
+        logger.log(`⚠️ OpenStates API failed (${response.status}) - using sample state data`);
         return this.generateSampleStateBills(stateCode, limit);
       }
       
@@ -59,13 +61,13 @@ class UniversalDataSources {
       const bills = this.transformOpenStatesBills(data.results || []);
       
       if (bills.length === 0) {
-        console.log('⚠️ No state bills returned from API - using sample data');
+        logger.log('⚠️ No state bills returned from API - using sample data');
         return this.generateSampleStateBills(stateCode, limit);
       }
       
       return bills;
     } catch (error) {
-      console.error('State bills fetch error:', error);
+      logger.error('State bills fetch error:', error);
       return this.generateSampleStateBills(stateCode, limit);
     }
   }
@@ -88,13 +90,13 @@ class UniversalDataSources {
       if (result.status === 'fulfilled' && result.value) {
         results.push(...result.value);
       } else {
-        console.log(`Local source ${index + 1} failed:`, result.reason);
+        logger.log(`Local source ${index + 1} failed:`, result.reason);
       }
     });
 
     // If no real local data, generate sample local content
     if (results.length === 0) {
-      console.log('⚠️ No real local data available - generating sample local content');
+      logger.log('⚠️ No real local data available - generating sample local content');
       results.push(...this.generateSampleLocalContent(location));
     }
 
@@ -116,7 +118,7 @@ class UniversalDataSources {
       const data = await response.json();
       return this.transformGoogleCivicData(data, location);
     } catch (error) {
-      console.error('Google Civic data fetch error:', error);
+      logger.error('Google Civic data fetch error:', error);
       return [];
     }
   }
@@ -132,7 +134,7 @@ class UniversalDataSources {
       // For now, return empty array but structure is ready
       return [];
     } catch (error) {
-      console.error('Ballotpedia data fetch error:', error);
+      logger.error('Ballotpedia data fetch error:', error);
       return [];
     }
   }
@@ -167,7 +169,7 @@ class UniversalDataSources {
 
       return [];
     } catch (error) {
-      console.error('Local news data fetch error:', error);
+      logger.error('Local news data fetch error:', error);
       return [];
     }
   }
@@ -193,7 +195,7 @@ class UniversalDataSources {
       // For now, return empty but framework is ready
       return [];
     } catch (error) {
-      console.error('County data fetch error:', error);
+      logger.error('County data fetch error:', error);
       return [];
     }
   }
@@ -498,15 +500,15 @@ class UniversalDataSources {
       if (stateBills.status === 'fulfilled') results.push(...stateBills.value);
       if (localContent.status === 'fulfilled') results.push(...localContent.value);
 
-      console.log(`Fetched ${results.length} real items for ${userLocation}`);
-      console.log(`- Federal: ${federalBills.status === 'fulfilled' ? federalBills.value.length : 0}`);
-      console.log(`- State: ${stateBills.status === 'fulfilled' ? stateBills.value.length : 0}`);
-      console.log(`- Local: ${localContent.status === 'fulfilled' ? localContent.value.length : 0}`);
+      logger.log(`Fetched ${results.length} real items for ${userLocation}`);
+      logger.log(`- Federal: ${federalBills.status === 'fulfilled' ? federalBills.value.length : 0}`);
+      logger.log(`- State: ${stateBills.status === 'fulfilled' ? stateBills.value.length : 0}`);
+      logger.log(`- Local: ${localContent.status === 'fulfilled' ? localContent.value.length : 0}`);
       
       return results;
 
     } catch (error) {
-      console.error('Error fetching universal content:', error);
+      logger.error('Error fetching universal content:', error);
       return [];
     }
   }

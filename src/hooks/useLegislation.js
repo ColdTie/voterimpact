@@ -6,6 +6,7 @@ import UniversalDataSources from '../services/UniversalDataSources';
 import { analyzePersonalImpact } from '../services/claudeService';
 import locationParser from '../utils/locationParser';
 import RelevanceScoring from '../services/RelevanceScoring';
+import logger from '../utils/logger';
 
 // Fallback to sample data if API fails
 import { getNationalizedContent, generateLocalContentTemplates } from '../data/nationalSampleContent';
@@ -59,7 +60,7 @@ export const useLegislation = (userProfile, filters = {}) => {
         }
         bills = [...bills, ...stateBills];
       } catch (error) {
-        console.error('Error fetching state bills:', error);
+        logger.error('Error fetching state bills:', error);
       }
     }
     
@@ -75,18 +76,18 @@ export const useLegislation = (userProfile, filters = {}) => {
         
         if (localMeasures && Array.isArray(localMeasures)) {
           bills = [...bills, ...localMeasures];
-          console.log(`Loaded ${localMeasures.length} local items for ${userProfile.location}`);
+          logger.log(`Loaded ${localMeasures.length} local items for ${userProfile.location}`);
         }
       } catch (error) {
-        console.error('Error fetching local measures:', error.message);
+        logger.error('Error fetching local measures:', error.message);
         
         // Fallback to simple local content generation
         try {
           const fallbackContent = generateLocalContentTemplates(userProfile.location);
           bills = [...bills, ...fallbackContent];
-          console.log(`Using fallback local content (${fallbackContent.length} items)`);
+          logger.log(`Using fallback local content (${fallbackContent.length} items)`);
         } catch (fallbackError) {
-          console.error('Error generating fallback content:', fallbackError);
+          logger.error('Error generating fallback content:', fallbackError);
         }
       }
     }
@@ -117,16 +118,16 @@ export const useLegislation = (userProfile, filters = {}) => {
         ]);
         
         if (universalContent && universalContent.length > 0) {
-          console.log(`✅ Loaded ${universalContent.length} real items from universal sources`);
+          logger.log(`✅ Loaded ${universalContent.length} real items from universal sources`);
           bills = [...bills, ...universalContent];
         } else {
-          console.log('⚠️ No real data available, using legacy sources...');
+          logger.log('⚠️ No real data available, using legacy sources...');
           // Fall back to legacy API system
           bills = await loadLegacyAPISources(scope, searchQuery, currentPage, pageSize, parsedLocation, userProfile);
         }
       } catch (error) {
-        console.error('Universal data sources failed:', error.message);
-        console.log('⚠️ Falling back to legacy API sources...');
+        logger.error('Universal data sources failed:', error.message);
+        logger.log('⚠️ Falling back to legacy API sources...');
         // Fall back to legacy API system
         bills = await loadLegacyAPISources(scope, searchQuery, currentPage, pageSize, parsedLocation, userProfile);
       }
@@ -219,19 +220,19 @@ export const useLegislation = (userProfile, filters = {}) => {
                 );
               }
             } catch (err) {
-              console.error('Error analyzing bill impact for', bill.title, ':', err.message);
+              logger.error('Error analyzing bill impact for', bill.title, ':', err.message);
               // Continue with original bill data
             }
           })
         ).catch(err => {
-          console.error('Error in background AI analysis:', err);
+          logger.error('Error in background AI analysis:', err);
         });
       }
 
       setHasMore(filteredBills.length === pageSize);
       
     } catch (err) {
-      console.error('Error loading legislation:', err);
+      logger.error('Error loading legislation:', err);
       setError('Failed to load legislation. Using sample data.');
       
       // Fallback to nationalized sample data

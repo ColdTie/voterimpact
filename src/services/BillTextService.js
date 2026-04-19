@@ -1,4 +1,5 @@
 import CongressService from './CongressService';
+import logger from '../utils/logger';
 
 class BillTextService {
   constructor() {
@@ -52,7 +53,7 @@ class BillTextService {
               }
             } catch (textError) {
               // Log but don't fail - continue with enhanced data
-              console.warn(`Bill text fetch failed for ${legislation.billNumber}:`, textError.message);
+              logger.warn(`Bill text fetch failed for ${legislation.billNumber}:`, textError.message);
             }
           } else {
             // Try fallback data sources when no API key is available
@@ -63,7 +64,7 @@ class BillTextService {
                 enhancedLegislation.dataSource = 'fallback';
               }
             } catch (fallbackError) {
-              console.warn('Fallback data fetch failed:', fallbackError.message);
+              logger.warn('Fallback data fetch failed:', fallbackError.message);
             }
           }
         }
@@ -78,7 +79,7 @@ class BillTextService {
       return enhancedLegislation;
       
     } catch (error) {
-      console.warn('Error in getEnhancedBillData:', error);
+      logger.warn('Error in getEnhancedBillData:', error);
       return enhancedLegislation; // Return the basic enhanced version
     }
   }
@@ -144,7 +145,7 @@ class BillTextService {
       return this.enhanceLegislationWithoutText(legislation);
       
     } catch (error) {
-      console.warn('Error enhancing legislation with text:', error);
+      logger.warn('Error enhancing legislation with text:', error);
       return this.enhanceLegislationWithoutText(legislation);
     }
   }
@@ -169,7 +170,7 @@ class BillTextService {
       });
 
       if (!response.ok) {
-        console.warn(`Failed to fetch bill text from ${textUrl}: ${response.status}`);
+        logger.warn(`Failed to fetch bill text from ${textUrl}: ${response.status}`);
         return null;
       }
 
@@ -195,7 +196,7 @@ class BillTextService {
 
       return null;
     } catch (error) {
-      console.warn('Error fetching bill text content:', error);
+      logger.warn('Error fetching bill text content:', error);
       return null;
     }
   }

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import logger from '../utils/logger';
 
 const AuthContext = createContext({});
 
@@ -58,20 +59,20 @@ export const AuthProvider = ({ children }) => {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user profile:', error);
+        logger.error('Error fetching user profile:', error);
         setUserProfile(null);
         return;
       }
 
       if (data) {
-        console.log('User profile loaded successfully:', data);
+        logger.debug('User profile loaded successfully');
         setUserProfile(data);
       } else {
-        console.log('No user profile found - new user needs to create profile');
+        logger.debug('No user profile found - new user needs to create profile');
         setUserProfile(null);
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      logger.error('Error fetching user profile:', error);
     }
   };
 
@@ -137,8 +138,7 @@ export const AuthProvider = ({ children }) => {
       setUserProfile(data);
       return { data, error: null };
     } catch (error) {
-      console.error('Error updating profile:', error);
-      console.error('Error details:', error.message, error.details, error.hint);
+      logger.error('Error updating profile:', error.message);
       return { data: null, error };
     }
   };

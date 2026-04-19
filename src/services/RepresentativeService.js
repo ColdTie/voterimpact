@@ -1,4 +1,6 @@
 // Service for fetching accurate representatives based on user location
+import logger from '../utils/logger';
+
 class RepresentativeService {
   constructor() {
     this.cache = new Map();
@@ -40,7 +42,7 @@ class RepresentativeService {
 
       const apiKey = process.env.REACT_APP_GOOGLE_CIVIC_API_KEY;
       if (!apiKey) {
-        console.warn('Google Civic API key not configured, using fallback');
+        logger.warn('Google Civic API key not configured, using fallback');
         return this.getFallbackRepresentatives(location);
       }
 
@@ -69,7 +71,7 @@ class RepresentativeService {
       return representatives;
 
     } catch (error) {
-      console.error('Error fetching representatives:', error);
+      logger.error('Error fetching representatives:', error);
       return this.getFallbackRepresentatives(location);
     }
   }

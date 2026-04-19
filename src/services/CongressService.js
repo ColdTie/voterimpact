@@ -1,6 +1,8 @@
 // Service for fetching real legislation data from Congress.gov API
 // Documentation: https://api.congress.gov/
 
+import logger from '../utils/logger';
+
 const CONGRESS_API_KEY = process.env.REACT_APP_CONGRESS_API_KEY || 'DEMO_KEY';
 const CONGRESS_API_BASE = 'https://api.congress.gov/v3';
 
@@ -52,7 +54,7 @@ class CongressService {
 
       return data;
     } catch (error) {
-      console.error('Congress API fetch error:', error);
+      logger.error('Congress API fetch error:', error);
       throw error;
     }
   }
