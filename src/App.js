@@ -7,6 +7,7 @@ import AuthWrapper from './components/Auth/AuthWrapper';
 import UserProfileForm from './components/UserProfileForm';
 import PoliticianCard from './components/PoliticianCard';
 import ComparisonModal from './components/ComparisonModal';
+import CommunityHub from './components/Community/CommunityHub';
 import PoliticianService from './services/PoliticianService';
 import { useRepresentatives } from './hooks/useRepresentatives';
 import { useLegislation } from './hooks/useLegislation';
@@ -84,6 +85,7 @@ function MainApp() {
   const [selectedBills, setSelectedBills] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(5);
+  const [activeTab, setActiveTab] = useState('legislation');
 
   // Use live legislation data instead of hardcoded bills
   const { 
@@ -578,10 +580,48 @@ function MainApp() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        user={displayUser} 
+      <Header
+        user={displayUser}
         onEditProfile={() => setShowProfileForm(true)}
       />
+
+      {/* Main Tab Navigation */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('legislation')}
+            className={`flex-1 py-3 text-sm font-semibold text-center border-b-2 transition-colors ${
+              activeTab === 'legislation'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Legislation</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('community')}
+            className={`flex-1 py-3 text-sm font-semibold text-center border-b-2 transition-colors ${
+              activeTab === 'community'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span>Community</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'legislation' && (
       <div className="bg-white border-b border-gray-200 px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -606,220 +646,231 @@ function MainApp() {
           )}
         </div>
       </div>
-
-      {/* Legislation Error/Status Section */}
-      {legislationError && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                {legislationError} Using sample data for now.
-                <button 
-                  onClick={refreshLegislation}
-                  className="ml-2 text-yellow-800 underline hover:text-yellow-900"
-                >
-                  Try again
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
       )}
-      
-      {/* User Representatives Section */}
-      {userProfile?.location && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-900">Your Representatives</h3>
-            <span className="text-xs text-gray-500">
-              Based on your location: {userProfile.location}
-            </span>
-          </div>
-          
-          {representativesLoading && (
-            <div className="flex items-center justify-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span className="ml-2 text-sm text-gray-600">Finding your representatives...</span>
-            </div>
-          )}
-          
-          {representativesError && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-3">
-              <div className="text-sm text-yellow-800 mb-3">
-                <strong>Unable to load representatives automatically</strong>
-                <p className="mt-1">We couldn't fetch your representatives from our data sources. Please use the button below to find them on the official government website.</p>
-              </div>
-              <button
-                onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                Find My Representatives
-              </button>
-            </div>
-          )}
-          
-          {!representativesLoading && userRepresentatives.length > 0 && (
-            <>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  {userRepresentatives.map((rep) => (
-                    <div key={rep.id} className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-gray-900">{rep.name}</div>
-                        <div className="text-gray-600">{rep.position} ({rep.party?.charAt(0) || 'I'})</div>
-                      </div>
-                      {rep.website && (
-                        <a 
-                          href={rep.website} 
-                          target="_blank" 
-                          rel="noopener,noreferrer"
-                          className="text-blue-600 hover:text-blue-800 text-xs"
-                        >
-                          Contact
-                        </a>
-                      )}
-                    </div>
-                  ))}
+
+      {/* Community Tab */}
+      {activeTab === 'community' && (
+        <CommunityHub userProfile={userProfile} />
+      )}
+
+      {/* Legislation Tab */}
+      {activeTab === 'legislation' && (
+        <>
+          {/* Legislation Error/Status Section */}
+          {legislationError && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    {legislationError} Using sample data for now.
+                    <button
+                      onClick={refreshLegislation}
+                      className="ml-2 text-yellow-800 underline hover:text-yellow-900"
+                    >
+                      Try again
+                    </button>
+                  </p>
                 </div>
               </div>
-              
-              {userRepresentatives.some(rep => rep.source === 'fallback') && (
-                <div className="mt-2 text-xs text-gray-500 text-center">
-                  ⓘ Using sample data. Visit official sites for current info.
+            </div>
+          )}
+
+          {/* User Representatives Section */}
+          {userProfile?.location && (
+            <div className="bg-white border-b border-gray-200 px-4 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-gray-900">Your Representatives</h3>
+                <span className="text-xs text-gray-500">
+                  Based on your location: {userProfile.location}
+                </span>
+              </div>
+
+              {representativesLoading && (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-sm text-gray-600">Finding your representatives...</span>
                 </div>
               )}
-            </>
-          )}
-          
-          {!representativesLoading && !representativesError && userRepresentatives.length === 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 cursor-pointer hover:bg-blue-100 transition-colors"
-                 onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}>
-              <div className="text-center">
-                <div className="mb-4">
-                  <svg className="mx-auto h-12 w-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.5a8.25 8.25 0 0116.5 0" />
-                  </svg>
+
+              {representativesError && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-3">
+                  <div className="text-sm text-yellow-800 mb-3">
+                    <strong>Unable to load representatives automatically</strong>
+                    <p className="mt-1">We couldn't fetch your representatives from our data sources. Please use the button below to find them on the official government website.</p>
+                  </div>
+                  <button
+                    onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Find My Representatives
+                  </button>
                 </div>
-                <p className="text-lg font-semibold text-gray-900 mb-2">House Representative</p>
-                <p className="text-sm text-gray-700 mb-4">We need your exact address to identify your House Representative</p>
+              )}
+
+              {!representativesLoading && userRepresentatives.length > 0 && (
+                <>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      {userRepresentatives.map((rep) => (
+                        <div key={rep.id} className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium text-gray-900">{rep.name}</div>
+                            <div className="text-gray-600">{rep.position} ({rep.party?.charAt(0) || 'I'})</div>
+                          </div>
+                          {rep.website && (
+                            <a
+                              href={rep.website}
+                              target="_blank"
+                              rel="noopener,noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-xs"
+                            >
+                              Contact
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {userRepresentatives.some(rep => rep.source === 'fallback') && (
+                    <div className="mt-2 text-xs text-gray-500 text-center">
+                      ⓘ Using sample data. Visit official sites for current info.
+                    </div>
+                  )}
+                </>
+              )}
+
+              {!representativesLoading && !representativesError && userRepresentatives.length === 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 cursor-pointer hover:bg-blue-100 transition-colors"
+                     onClick={() => window.open('https://www.house.gov/representatives/find-your-representative', '_blank', 'noopener,noreferrer')}>
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <svg className="mx-auto h-12 w-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.5a8.25 8.25 0 0116.5 0" />
+                      </svg>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900 mb-2">House Representative</p>
+                    <p className="text-sm text-gray-700 mb-4">We need your exact address to identify your House Representative</p>
+                    <button
+                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Find My Representative
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <FilterBar
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            activeScope={activeScope}
+            onScopeChange={setActiveScope}
+          />
+          <main className="pb-6">
+            {/* Bill count indicator */}
+            {filteredLegislation.length > 0 && (
+              <div className="px-4 mb-4">
+                <p className="text-sm text-gray-600">
+                  Showing {Math.min(displayLimit, filteredLegislation.length)} of {filteredLegislation.length} bills
+                </p>
+              </div>
+            )}
+
+            {/* Display limited bills */}
+            {filteredLegislation.slice(0, displayLimit).map((legislation, index) => (
+              <LegislationCard
+                key={legislation.id}
+                legislation={legislation}
+                politicians={politicians}
+                useAI={useAI}
+                isSelected={selectedBills.some(b => b.id === legislation.id)}
+                onSelectionChange={(isSelected) => handleBillSelection(legislation, isSelected)}
+                index={index}
+              />
+            ))}
+
+            {/* Load More button */}
+            {filteredLegislation.length > displayLimit && (
+              <div className="text-center px-4 py-6">
                 <button
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+                  onClick={() => setDisplayLimit(prev => prev + 5)}
+                  className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                  Find My Representative
+                  Load More Bills ({filteredLegislation.length - displayLimit} remaining)
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      <FilterBar 
-        activeFilter={activeFilter} 
-        onFilterChange={setActiveFilter}
-        activeScope={activeScope}
-        onScopeChange={setActiveScope}
-      />
-      <main className="pb-6">
-        {/* Bill count indicator */}
-        {filteredLegislation.length > 0 && (
-          <div className="px-4 mb-4">
-            <p className="text-sm text-gray-600">
-              Showing {Math.min(displayLimit, filteredLegislation.length)} of {filteredLegislation.length} bills
-            </p>
-          </div>
-        )}
-        
-        {/* Display limited bills */}
-        {filteredLegislation.slice(0, displayLimit).map((legislation, index) => (
-          <LegislationCard 
-            key={legislation.id} 
-            legislation={legislation} 
-            politicians={politicians}
-            useAI={useAI}
-            isSelected={selectedBills.some(b => b.id === legislation.id)}
-            onSelectionChange={(isSelected) => handleBillSelection(legislation, isSelected)}
-            index={index}
-          />
-        ))}
-        
-        {/* Load More button */}
-        {filteredLegislation.length > displayLimit && (
-          <div className="text-center px-4 py-6">
-            <button
-              onClick={() => setDisplayLimit(prev => prev + 5)}
-              className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Load More Bills ({filteredLegislation.length - displayLimit} remaining)
-            </button>
-          </div>
-        )}
-        
-        {filteredLegislation.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No legislation found for this category.</p>
-          </div>
-        )}
-      </main>
+            )}
 
-      {/* Floating Comparison Bar */}
-      {selectedBills.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 z-40">
-          <div className="flex items-center justify-between max-w-6xl mx-auto">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm font-medium text-gray-900">
-                {selectedBills.length} bill{selectedBills.length !== 1 ? 's' : ''} selected for comparison
-              </span>
-              <div className="flex space-x-2">
-                {selectedBills.slice(0, 3).map((bill, index) => (
-                  <div key={bill.id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                    {bill.title.length > 20 ? bill.title.substring(0, 20) + '...' : bill.title}
+            {filteredLegislation.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No legislation found for this category.</p>
+              </div>
+            )}
+          </main>
+
+          {/* Floating Comparison Bar */}
+          {selectedBills.length > 0 && (
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 z-40">
+              <div className="flex items-center justify-between max-w-6xl mx-auto">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-medium text-gray-900">
+                    {selectedBills.length} bill{selectedBills.length !== 1 ? 's' : ''} selected for comparison
+                  </span>
+                  <div className="flex space-x-2">
+                    {selectedBills.slice(0, 3).map((bill) => (
+                      <div key={bill.id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                        {bill.title.length > 20 ? bill.title.substring(0, 20) + '...' : bill.title}
+                      </div>
+                    ))}
+                    {selectedBills.length > 3 && (
+                      <div className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                        +{selectedBills.length - 3} more
+                      </div>
+                    )}
                   </div>
-                ))}
-                {selectedBills.length > 3 && (
-                  <div className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
-                    +{selectedBills.length - 3} more
-                  </div>
-                )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={clearSelectedBills}
+                    className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-800"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    onClick={openComparison}
+                    disabled={selectedBills.length < 2}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Compare Bills ({selectedBills.length})
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={clearSelectedBills}
-                className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-800"
-              >
-                Clear
-              </button>
-              <button
-                onClick={openComparison}
-                disabled={selectedBills.length < 2}
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Compare Bills ({selectedBills.length})
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* Comparison Modal */}
-      <ComparisonModal
-        isOpen={showComparison}
-        onClose={() => setShowComparison(false)}
-        selectedBills={selectedBills}
-        politicians={politicians}
-        userProfile={userProfile}
-      />
+          {/* Comparison Modal */}
+          <ComparisonModal
+            isOpen={showComparison}
+            onClose={() => setShowComparison(false)}
+            selectedBills={selectedBills}
+            politicians={politicians}
+            userProfile={userProfile}
+          />
+        </>
+      )}
     </div>
   );
 }
