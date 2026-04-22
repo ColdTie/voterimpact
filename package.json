@@ -1,6 +1,7 @@
 {
   "name": "voterimpact",
   "version": "0.1.0",
+  "homepage": "https://coldtie.github.io/voterimpact",
   "private": true,
   "dependencies": {
     "@anthropic-ai/sdk": "^0.56.0",
