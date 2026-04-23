@@ -7,6 +7,7 @@ import AuthWrapper from './components/Auth/AuthWrapper';
 import UserProfileForm from './components/UserProfileForm';
 import PoliticianCard from './components/PoliticianCard';
 import ComparisonModal from './components/ComparisonModal';
+import CommunityHub from './components/CommunityHub';
 import PoliticianService from './services/PoliticianService';
 import { useRepresentatives } from './hooks/useRepresentatives';
 import { useLegislation } from './hooks/useLegislation';
@@ -84,6 +85,7 @@ function MainApp() {
   const [selectedBills, setSelectedBills] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(5);
+  const [activeTab, setActiveTab] = useState('legislation');
 
   // Use live legislation data instead of hardcoded bills
   const { 
@@ -578,10 +580,17 @@ function MainApp() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        user={displayUser} 
+      <Header
+        user={displayUser}
         onEditProfile={() => setShowProfileForm(true)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
+      {activeTab === 'community' && (
+        <CommunityHub userProfile={userProfile} />
+      )}
+
+      {activeTab === 'legislation' && (
       <div className="bg-white border-b border-gray-200 px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -606,7 +615,9 @@ function MainApp() {
           )}
         </div>
       </div>
+      )}
 
+      {activeTab === 'legislation' && (<>
       {/* Legislation Error/Status Section */}
       {legislationError && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-4">
@@ -820,6 +831,7 @@ function MainApp() {
         politicians={politicians}
         userProfile={userProfile}
       />
+      </>)}
     </div>
   );
 }
